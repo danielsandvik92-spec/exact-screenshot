@@ -5,6 +5,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Landing1 from "./pages/Landing1.tsx";
+import Landing2 from "./pages/Landing2.tsx";
+import Landing3 from "./pages/Landing3.tsx";
+import Login from "./pages/Login.tsx";
 
 const queryClient = new QueryClient();
 
@@ -15,8 +19,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/" element={<Landing1 />} />
+          <Route path="/om-appen" element={<Landing2 />} />
+          <Route path="/kom-i-gang" element={<Landing3 />} />
+          <Route path="/innlogging" element={<Login />} />
+          <Route path="/app" element={<Index />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
