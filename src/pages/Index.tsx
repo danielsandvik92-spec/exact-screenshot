@@ -23,12 +23,14 @@ const Index = () => {
   const [relationSessions, setRelationSessions] = useState<RelationSessionEntry[]>([]);
 
   useEffect(() => {
-    if (!supabase) return;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        navigate("/");
-      }
-    });
+    useEffect(() => {
+  if (!supabase) return;
+  supabase.auth.getSession().then(({ data }) => {
+    if (!data.session) {
+      window.location.href = "/";
+    }
+  });
+}, []);
     sGet<CheckinEntry[]>("checkins").then(d => d && setCheckins(d));
     sGet<EveningEvalEntry[]>("evening-evals").then(d => d && setEveningEvals(d));
     sGet<AcuteSessionEntry[]>("acute-sessions").then(d => d && setAcuteSessions(d));
