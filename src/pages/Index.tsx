@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 import { sGet, sSet } from "@/lib/storage";
 import type { ScreenId, AppDB, CheckinEntry, EveningEvalEntry, AcuteSessionEntry, SocialSessionEntry, CriticSessionEntry, RelationSessionEntry } from "@/lib/types";
 import { HomeScreen } from "@/screens/HomeScreen";
@@ -11,6 +13,7 @@ import { EmotionScreen } from "@/screens/EmotionScreen";
 import { PatternsScreen } from "@/screens/PatternsScreen";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [screen, setScreen] = useState<ScreenId>("home");
   const [checkins, setCheckins] = useState<CheckinEntry[]>([]);
   const [eveningEvals, setEveningEvals] = useState<EveningEvalEntry[]>([]);
@@ -20,6 +23,12 @@ const Index = () => {
   const [relationSessions, setRelationSessions] = useState<RelationSessionEntry[]>([]);
 
   useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) {
+        navigate("/");
+      }
+    });
     sGet<CheckinEntry[]>("checkins").then(d => d && setCheckins(d));
     sGet<EveningEvalEntry[]>("evening-evals").then(d => d && setEveningEvals(d));
     sGet<AcuteSessionEntry[]>("acute-sessions").then(d => d && setAcuteSessions(d));
