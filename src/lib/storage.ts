@@ -26,8 +26,8 @@ const TABLE_MAP: Record<string, string> = {
 
 async function getUserId(): Promise<string | null> {
   if (!supabase) return null;
-  const { data } = await supabase.auth.getUser();
-  return data?.user?.id ?? null;
+  const { data: sessionData } = await supabase.auth.getSession();
+  return sessionData?.session?.user?.id ?? null;
 }
 
 function toRow(key: string, entry: Record<string, unknown>, userId: string) {
