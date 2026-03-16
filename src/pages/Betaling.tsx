@@ -22,28 +22,32 @@ const Betaling = () => {
     });
   }, []);
 
-  const handleBetaling = async () => {
-    if (!supabase) return;
-    setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+const handleBetaling = async () => {
+  if (!supabase) return;
+  setLoading(true);
+  
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
 
-    const { data, error } = await supabase.functions.invoke("create-checkout", {
-      body: {
-        user_id: user.id,
-        email: user.email,
-        return_url: window.location.origin + "/app",
-      },
-    });
+  const { data, error } = await supabase.functions.invoke("create-checkout", {
+    body: {
+      user_id: session.user.id,
+      email: session.user.email,
+      return_url: window.location.origin + "/app",
+    },
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+    },
+  });
 
-    if (error || !data?.url) {
-      console.error("Feil ved opprettelse av betalingsside:", error);
-      setLoading(false);
-      return;
-    }
+  if (error || !data?.url) {
+    console.error("Feil ved opprettelse av betalingsside:", error);
+    setLoading(false);
+    return;
+  }
 
-    window.location.href = data.url;
-  };
+  window.location.href = data.url;
+};
 
   return (
     <div style={{
