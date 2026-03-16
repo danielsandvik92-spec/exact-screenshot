@@ -48,22 +48,41 @@ export function HomeScreen({ onNav, db, addCheckin }: HomeScreenProps) {
             <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", marginTop: 2, fontWeight: 400 }}>{greeting}. Hva trenger du akkurat nå?</div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <button
-              onClick={() => navigate("/bakgrunn")}
-              style={{
-                background: "none",
-                border: "none",
-                fontFamily: "'Nunito', sans-serif",
-                fontSize: "13px",
-                color: "hsl(var(--text-muted))",
-                cursor: "pointer",
-                padding: 0,
-                textDecoration: "underline",
-                textUnderlineOffset: "3px",
-              }}
-            >
-              📖 Hvorfor appen er som den er
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
+              <button
+                onClick={() => navigate("/bakgrunn")}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontFamily: "'Nunito', sans-serif",
+                  fontSize: "13px",
+                  color: "hsl(var(--text-muted))",
+                  cursor: "pointer",
+                  padding: 0,
+                  textDecoration: "underline",
+                  textUnderlineOffset: "3px",
+                }}
+              >
+                📖 Hvorfor appen er som den er
+              </button>
+              <button
+                onClick={() => navigate("/betaling")}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontFamily: "'Nunito', sans-serif",
+                  fontSize: "13px",
+                  color: "#9B6B8A",
+                  cursor: "pointer",
+                  padding: 0,
+                  textDecoration: "underline",
+                  textUnderlineOffset: "3px",
+                  fontWeight: 600,
+                }}
+              >
+                ⭐ Ro & Retning Plus
+              </button>
+            </div>
             <div style={{ width: 40, height: 40, background: "hsl(var(--green))", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🌿</div>
           </div>
         </div>
