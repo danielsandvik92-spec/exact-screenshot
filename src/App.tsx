@@ -1,5 +1,3 @@
-import Bakgrunn from "./pages/Bakgrunn.tsx";
-import Gdpr from "./pages/Gdpr.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -11,6 +9,9 @@ import Landing1 from "./pages/Landing1.tsx";
 import Landing2 from "./pages/Landing2.tsx";
 import Landing3 from "./pages/Landing3.tsx";
 import Login from "./pages/Login.tsx";
+import Bakgrunn from "./pages/Bakgrunn.tsx";
+import Gdpr from "./pages/Gdpr.tsx";
+import Betaling from "./pages/Betaling.tsx";
 
 const queryClient = new QueryClient();
 
@@ -21,13 +22,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/bakgrunn" element={<Bakgrunn />} />
-          <Route path="/personvern" element={<Gdpr />} />
           <Route path="/" element={<Landing1 />} />
           <Route path="/om-appen" element={<Landing2 />} />
           <Route path="/kom-i-gang" element={<Landing3 />} />
           <Route path="/innlogging" element={<Login />} />
           <Route path="/app" element={<Index />} />
+          <Route path="/bakgrunn" element={<Bakgrunn />} />
+          <Route path="/personvern" element={<Gdpr />} />
+          <Route path="/betaling" element={<Betaling />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
