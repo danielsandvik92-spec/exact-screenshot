@@ -1,3 +1,4 @@
+import Bakgrunn from "./pages/Bakgrunn.tsx";
 import Gdpr from "./pages/Gdpr.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -20,6 +21,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/bakgrunn" element={<Bakgrunn />} />
           <Route path="/personvern" element={<Gdpr />} />
           <Route path="/" element={<Landing1 />} />
           <Route path="/om-appen" element={<Landing2 />} />

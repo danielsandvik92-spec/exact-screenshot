@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MOOD_META } from "@/lib/data";
 import { CheckinGraph } from "@/components/CheckinGraph";
 import type { AppDB, CheckinEntry, ScreenId } from "@/lib/types";
@@ -10,6 +11,7 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ onNav, db, addCheckin }: HomeScreenProps) {
+  const navigate = useNavigate();
   const [mood, setMood] = useState<string | null>(null);
   const [energy, setEnergy] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
@@ -29,12 +31,12 @@ export function HomeScreen({ onNav, db, addCheckin }: HomeScreenProps) {
 
   const modules = [
     { icon: "🌬️", title: "Akutt regulering", sub: "Når alarmen er høy", nav: "acute" as ScreenId, color: "#2D4A3E" },
-{ icon: "👥", title: "Etter sosiale situasjoner", sub: "Når tankene spinner etter å ha vært med folk", nav: "social" as ScreenId, color: "#9B6B8A" },
-{ icon: "🔥", title: "Når du er hard mot deg selv", sub: "Når du er din egen verste kritiker", nav: "critic" as ScreenId, color: "#7A5A3A" },
-{ icon: "💙", title: "Når relasjoner er vanskelige", sub: "Når noen nære gjør vondt eller skaper uro", nav: "relation" as ScreenId, color: "#3A5A7A" },
-{ icon: "🌱", title: "Hvem er du egentlig?", sub: "Hvem er du når du er rolig?", nav: "identity" as ScreenId, color: "#4A6A3A" },
-{ icon: "🫧", title: "Kjenn etter", sub: "Møt det som er der, uten å analysere", nav: "emotion" as ScreenId, color: "#4A3A6A" },
-{ icon: "📊", title: "Dine mønstre", sub: "Se dine mønstre over tid", nav: "patterns" as ScreenId, color: "#6B5E54" },
+    { icon: "👥", title: "Etter sosiale situasjoner", sub: "Når tankene spinner etter å ha vært med folk", nav: "social" as ScreenId, color: "#9B6B8A" },
+    { icon: "🔥", title: "Når du er hard mot deg selv", sub: "Når du er din egen verste kritiker", nav: "critic" as ScreenId, color: "#7A5A3A" },
+    { icon: "💙", title: "Når relasjoner er vanskelige", sub: "Når noen nære gjør vondt eller skaper uro", nav: "relation" as ScreenId, color: "#3A5A7A" },
+    { icon: "🌱", title: "Hvem er du egentlig?", sub: "Hvem er du når du er rolig?", nav: "identity" as ScreenId, color: "#4A6A3A" },
+    { icon: "🫧", title: "Kjenn etter", sub: "Møt det som er der, uten å analysere", nav: "emotion" as ScreenId, color: "#4A3A6A" },
+    { icon: "📊", title: "Dine mønstre", sub: "Se dine mønstre over tid", nav: "patterns" as ScreenId, color: "#6B5E54" },
   ];
 
   return (
@@ -45,7 +47,25 @@ export function HomeScreen({ onNav, db, addCheckin }: HomeScreenProps) {
             <div style={{ fontFamily: "'Lora', serif", fontSize: 26, color: "hsl(var(--green))", lineHeight: 1.2 }}>Ro & Retning</div>
             <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", marginTop: 2, fontWeight: 400 }}>{greeting}. Hva trenger du akkurat nå?</div>
           </div>
-          <div style={{ width: 40, height: 40, background: "hsl(var(--green))", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🌿</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <button
+              onClick={() => navigate("/bakgrunn")}
+              style={{
+                background: "none",
+                border: "none",
+                fontFamily: "'Nunito', sans-serif",
+                fontSize: "13px",
+                color: "hsl(var(--text-muted))",
+                cursor: "pointer",
+                padding: 0,
+                textDecoration: "underline",
+                textUnderlineOffset: "3px",
+              }}
+            >
+              📖 Hvorfor appen er som den er
+            </button>
+            <div style={{ width: 40, height: 40, background: "hsl(var(--green))", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🌿</div>
+          </div>
         </div>
       </div>
 
