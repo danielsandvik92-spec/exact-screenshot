@@ -20,3 +20,16 @@ export function getSessionId(): string {
   }
   return id;
 }
+export async function checkIsPlus(): Promise<boolean> {
+  if (!supabase) return false;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+  
+  const { data } = await supabase
+    .from("profiles")
+    .select("is_plus")
+    .eq("id", user.id)
+    .single();
+  
+  return data?.is_plus ?? false;
+}
