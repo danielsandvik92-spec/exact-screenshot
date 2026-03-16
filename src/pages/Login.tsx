@@ -160,6 +160,19 @@ const Login = () => {
           {isRegister ? "Har du allerede konto? Logg inn" : "Ny bruker? Opprett konto"}
         </button>
 
+        <p style={{
+          fontFamily: "'Nunito', sans-serif",
+          fontSize: "12px",
+          color: "#8E9B8A",
+          textAlign: "center",
+          marginTop: "8px",
+        }}>
+          Ved å logge inn godtar du vår{" "}
+          <a href="/personvern" style={{ color: "#2D4A3E" }}>
+            personvernserklæring
+          </a>
+        </p>
+
       </div>
     </div>
   );
