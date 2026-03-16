@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { sGet, sSet } from "@/lib/storage";
 import type { ScreenId, AppDB, CheckinEntry, EveningEvalEntry, AcuteSessionEntry, SocialSessionEntry, CriticSessionEntry, RelationSessionEntry } from "@/lib/types";
