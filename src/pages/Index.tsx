@@ -12,7 +12,6 @@ import { EmotionScreen } from "@/screens/EmotionScreen";
 import { PatternsScreen } from "@/screens/PatternsScreen";
 
 const Index = () => {
-  const navigate = useNavigate();
   const [screen, setScreen] = useState<ScreenId>("home");
   const [checkins, setCheckins] = useState<CheckinEntry[]>([]);
   const [eveningEvals, setEveningEvals] = useState<EveningEvalEntry[]>([]);
