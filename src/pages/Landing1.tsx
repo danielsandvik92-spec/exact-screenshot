@@ -1,7 +1,19 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Landing1 = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const harSett = localStorage.getItem("ro-har-sett-intro");
+    if (harSett) {
+      navigate("/innlogging");
+    }
+  }, []);
+
+  const handleFortsett = () => {
+    navigate("/om-appen");
+  };
 
   return (
     <div style={{
@@ -48,7 +60,7 @@ const Landing1 = () => {
 
       <div style={{ width: "100%", marginTop: "auto", paddingTop: "48px" }}>
         <button
-          onClick={() => navigate("/om-appen")}
+          onClick={handleFortsett}
           style={{
             width: "100%",
             padding: "16px",
