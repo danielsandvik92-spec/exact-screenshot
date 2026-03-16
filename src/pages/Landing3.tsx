@@ -11,6 +11,11 @@ const Landing3 = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string | null>(null);
 
+  const handleContinue = () => {
+    localStorage.setItem("ro-har-sett-intro", "ja");
+    navigate("/innlogging");
+  };
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -69,7 +74,7 @@ const Landing3 = () => {
 
         <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "8px" }}>
           <button
-            onClick={() => navigate("/innlogging")}
+            onClick={handleContinue}
             style={{
               width: "100%",
               padding: "16px",
@@ -86,26 +91,23 @@ const Landing3 = () => {
             Fortsett med e-post
           </button>
 
-<button
-  onClick={() => {
-    localStorage.setItem("ro-har-sett-intro", "ja");
-    navigate("/innlogging");
-  }}
-  style={{
-    width: "100%",
-    padding: "16px",
-    background: "#2D4A3E",
-    color: "#F9FAF8",
-    border: "none",
-    borderRadius: "12px",
-    fontFamily: "'Nunito', sans-serif",
-    fontSize: "16px",
-    fontWeight: 600,
-    cursor: "pointer",
-  }}
->
-  Fortsett med e-post
-</button>
+          <button
+            onClick={handleContinue}
+            style={{
+              width: "100%",
+              padding: "16px",
+              background: "transparent",
+              color: "#2D4A3E",
+              border: "1.5px solid #2D4A3E",
+              borderRadius: "12px",
+              fontFamily: "'Nunito', sans-serif",
+              fontSize: "16px",
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Fortsett med Google
+          </button>
         </div>
       </div>
     </div>
