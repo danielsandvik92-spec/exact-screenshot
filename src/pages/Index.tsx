@@ -20,20 +20,22 @@ const Index = () => {
   const [criticSessions, setCriticSessions] = useState<CriticSessionEntry[]>([]);
   const [relationSessions, setRelationSessions] = useState<RelationSessionEntry[]>([]);
 
-  useEffect(() => {
-    if (!supabase) return;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        window.location.href = "/";
-      }
-    });
-    sGet<CheckinEntry[]>("checkins").then(d => d && setCheckins(d));
-    sGet<EveningEvalEntry[]>("evening-evals").then(d => d && setEveningEvals(d));
-    sGet<AcuteSessionEntry[]>("acute-sessions").then(d => d && setAcuteSessions(d));
-    sGet<SocialSessionEntry[]>("social-sessions").then(d => d && setSocialSessions(d));
-    sGet<CriticSessionEntry[]>("critic-sessions").then(d => d && setCriticSessions(d));
-    sGet<RelationSessionEntry[]>("relation-sessions").then(d => d && setRelationSessions(d));
-  }, []);
+useEffect(() => {
+  if (!supabase) return;
+  supabase.auth.getSession().then(({ data }) => {
+    if (!data.session) {
+      window.location.href = "/";
+    } else {
+      console.log("Bruker innlogget:", data.session.user.id);
+    }
+  });
+  sGet<CheckinEntry[]>("checkins").then(d => d && setCheckins(d));
+  sGet<EveningEvalEntry[]>("evening-evals").then(d => d && setEveningEvals(d));
+  sGet<AcuteSessionEntry[]>("acute-sessions").then(d => d && setAcuteSessions(d));
+  sGet<SocialSessionEntry[]>("social-sessions").then(d => d && setSocialSessions(d));
+  sGet<CriticSessionEntry[]>("critic-sessions").then(d => d && setCriticSessions(d));
+  sGet<RelationSessionEntry[]>("relation-sessions").then(d => d && setRelationSessions(d));
+}, []);
 
   const addCheckin = async (entry: CheckinEntry) => { const u = [...checkins, entry]; setCheckins(u); await sSet("checkins", u); };
   const addEveningEval = async (entry: EveningEvalEntry) => { const u = [...eveningEvals, entry]; setEveningEvals(u); await sSet("evening-evals", u); };
