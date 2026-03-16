@@ -1,4 +1,3 @@
-cat > /workspaces/exact-screenshot/src/pages/Betaling.tsx << 'ENDOFFILE'
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
@@ -204,4 +203,3 @@ const Betaling = () => {
 };
 
 export default Betaling;
-ENDOFFILE
