@@ -24,9 +24,14 @@ const TABLE_MAP: Record<string, string> = {
   "relation-sessions": "relation_sessions",
 };
 
-function toRow(key: string, entry: Record<string, unknown>) {
-  const sessionId = getSessionId();
-  const base = { session_id: sessionId };
+async function getUserId(): Promise<string | null> {
+  if (!supabase) return null;
+  const { data } = await supabase.auth.getUser();
+  return data?.user?.id ?? null;
+}
+
+function toRow(key: string, entry: Record<string, unknown>, userId: string) {
+  const base = { user_id: userId };
   switch (key) {
     case "checkins":
       return { ...base, mood: entry.mood, energy: entry.energy, date: entry.date, ts: entry.ts };
@@ -64,11 +69,12 @@ export async function sGet<T>(key: string): Promise<T | null> {
   const table = TABLE_MAP[key];
   if (!table || !supabase) return lsGet<T>(key);
   try {
-    const sessionId = getSessionId();
+    const userId = await getUserId();
+    if (!userId) return lsGet<T>(key);
     const { data, error } = await supabase
       .from(table)
       .select("*")
-      .eq("session_id", sessionId)
+      .eq("user_id", userId)
       .order("ts", { ascending: true });
     if (error) throw error;
     if (!data || data.length === 0) return null;
@@ -86,7 +92,9 @@ export async function sSet(key: string, val: unknown): Promise<void> {
   if (arr.length === 0) return;
   const latest = arr[arr.length - 1] as Record<string, unknown>;
   try {
-    const row = toRow(key, latest);
+    const userId = await getUserId();
+    if (!userId) return lsSet(key, val);
+    const row = toRow(key, latest, userId);
     const { error } = await supabase.from(table).insert(row);
     if (error) throw error;
     lsSet(key, val);
