@@ -1,14 +1,25 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 
 const Landing1 = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const harSett = localStorage.getItem("ro-har-sett-intro");
-    if (harSett) {
-      navigate("/innlogging");
+
+    if (!supabase) {
+      if (harSett) navigate("/innlogging");
+      return;
     }
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        navigate("/app");
+      } else if (harSett) {
+        navigate("/innlogging");
+      }
+    });
   }, []);
 
   const handleFortsett = () => {
