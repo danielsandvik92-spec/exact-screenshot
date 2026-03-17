@@ -46,13 +46,14 @@ useEffect(() => {
 
   const db: AppDB = { checkins, eveningEvals, acuteSessions, socialSessions, criticSessions, relationSessions };
 
-  const navItems = [
-    { icon: "🏠", label: "Hjem", id: "home" as ScreenId },
-    { icon: "🌬️", label: "Akutt", id: "acute" as ScreenId },
-    { icon: "🔥", label: "Skam", id: "critic" as ScreenId },
-    { icon: "💙", label: "Relasjon", id: "relation" as ScreenId },
-    { icon: "📊", label: "Mønstre", id: "patterns" as ScreenId },
-  ];
+ const navItems = [
+  { icon: "🏠", label: "Hjem", id: "home" as ScreenId },
+  { icon: "🌬️", label: "Akutt", id: "acute" as ScreenId },
+  { icon: "👥", label: "Sosialt", id: "social" as ScreenId },
+  { icon: "🔥", label: "Skam", id: "critic" as ScreenId },
+  { icon: "💙", label: "Relasjon", id: "relation" as ScreenId },
+  { icon: "📊", label: "Mønstre", id: "patterns" as ScreenId },
+];
 
   const renderScreen = () => {
     switch (screen) {
