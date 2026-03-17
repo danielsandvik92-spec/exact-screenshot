@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { RELATION_TRIGS } from "@/lib/data";
-import { ChipSelector } from "@/components/ChipSelector";
 import { ReflectionBubble } from "@/components/ReflectionBubble";
 import type { RelationSessionEntry } from "@/lib/types";
 
@@ -13,32 +11,47 @@ type Mode = "velg" | "skriv" | null;
 
 export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
   const [mode, setMode] = useState<Mode>(null);
-  const [trigger, setTrigger] = useState<string | null>(null);
   const [step, setStep] = useState(0);
-  const [interpretation, setInterpretation] = useState("");
-  const [alternatives, setAlternatives] = useState("");
   const [feeling, setFeeling] = useState("");
-  const [freeText, setFreeText] = useState("");
+  const [what, setWhat] = useState("");
+  const [perspective, setPerspective] = useState("");
   const [done, setDone] = useState(false);
   const [reflectionContext, setReflectionContext] = useState("");
 
-  const finishStructured = async (handling: string) => {
-    const trigItem = RELATION_TRIGS.find(t => t.id === trigger);
-    const label = trigItem ? trigItem.label : (trigger || "ukjent");
-    const entry: RelationSessionEntry = {
-      trigger: label, interpretation, alternatives, feeling, mode: handling, ts: new Date().toISOString()
-    };
-    await addSession(entry);
-    setReflectionContext(`Brukeren ble trigget av: "${label}". Tolkning: "${interpretation}". Alternative forklaringer: "${alternatives}". Følelsen under: "${feeling}".`);
-    setDone(true);
-  };
+  // Strukturert modus
+  const [trigger, setTrigger] = useState<string | null>(null);
+  const [interpretation, setInterpretation] = useState("");
+  const [alternatives, setAlternatives] = useState("");
 
   const finishFree = async () => {
     const entry: RelationSessionEntry = {
-      trigger: "fri refleksjon", interpretation: freeText, alternatives: "", feeling: "", mode: "fri", ts: new Date().toISOString()
+      trigger: "fri refleksjon",
+      interpretation: what,
+      alternatives: perspective,
+      feeling,
+      mode: "fri",
+      ts: new Date().toISOString()
     };
     await addSession(entry);
-    setReflectionContext(`Brukeren beskrev en vanskelig relasjonssituasjon: "${freeText}"`);
+    setReflectionContext(
+      `Brukeren kjenner: "${feeling}"\nHva skjedde: "${what}"\nAnnet perspektiv: "${perspective}"`
+    );
+    setDone(true);
+  };
+
+  const finishStructured = async (handling: string) => {
+    const entry: RelationSessionEntry = {
+      trigger: trigger || "ukjent",
+      interpretation,
+      alternatives,
+      feeling,
+      mode: handling,
+      ts: new Date().toISOString()
+    };
+    await addSession(entry);
+    setReflectionContext(
+      `Brukeren ble trigget av: "${trigger}". Tolkning: "${interpretation}". Alternative forklaringer: "${alternatives}". Følelsen under: "${feeling}".`
+    );
     setDone(true);
   };
 
@@ -57,7 +70,7 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
           </div>
           <ReflectionBubble
             context={reflectionContext}
-            systemPrompt="Du er en varm, rolig støtteperson. Brukeren har nettopp delt noe vanskelig om en relasjon. Valider det de kjenner på — ikke analyser, ikke gi råd. Si noe sant og varmt om det de har delt. Skriv på norsk, 2-4 setninger."
+            systemPrompt="Du er en varm, rolig støtteperson. Brukeren har nettopp gått gjennom tre steg der de har kjent etter hva de føler, hva som skjedde, og forsøkt å se det fra et annet perspektiv. Les alt de har delt nøye. Valider det de kjenner på — ikke analyser, ikke gi råd. Si noe sant og varmt om mønstre du hører. Skriv på norsk, 3-4 setninger."
             color="green"
             autoFetch={true}
           />
@@ -89,26 +102,6 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <button
-                  onClick={() => setMode("velg")}
-                  style={{
-                    padding: "16px 18px",
-                    background: "hsl(var(--surface))",
-                    border: "1.5px solid hsl(var(--surface2))",
-                    borderRadius: "var(--radius-sm)",
-                    fontFamily: "'Nunito', sans-serif",
-                    fontSize: 15,
-                    color: "hsl(var(--text))",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  <div style={{ fontWeight: 600, marginBottom: 4 }}>📋 Velg fra liste</div>
-                  <div style={{ fontSize: 13, color: "hsl(var(--text-muted))" }}>
-                    For når du vil ha struktur og gjenkjenning
-                  </div>
-                </button>
-                <button
                   onClick={() => setMode("skriv")}
                   style={{
                     padding: "16px 18px",
@@ -120,12 +113,30 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
                     color: "hsl(var(--text))",
                     cursor: "pointer",
                     textAlign: "left",
-                    lineHeight: 1.5,
                   }}
                 >
                   <div style={{ fontWeight: 600, marginBottom: 4 }}>✍️ Skriv fritt</div>
                   <div style={{ fontSize: 13, color: "hsl(var(--text-muted))" }}>
-                    For når du vil utforske uten rammer
+                    Tre enkle spørsmål — skriv det som er
+                  </div>
+                </button>
+                <button
+                  onClick={() => setMode("velg")}
+                  style={{
+                    padding: "16px 18px",
+                    background: "hsl(var(--surface))",
+                    border: "1.5px solid hsl(var(--surface2))",
+                    borderRadius: "var(--radius-sm)",
+                    fontFamily: "'Nunito', sans-serif",
+                    fontSize: 15,
+                    color: "hsl(var(--text))",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>📋 Velg fra liste</div>
+                  <div style={{ fontSize: 13, color: "hsl(var(--text-muted))" }}>
+                    For når du vil ha struktur og gjenkjenning
                   </div>
                 </button>
               </div>
@@ -133,37 +144,141 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
           </div>
         )}
 
-        {/* FRI SKRIVING */}
+        {/* FRI SKRIVING — TRE STEG */}
         {mode === "skriv" && (
           <div className="fade-up">
             <button
-              onClick={() => setMode(null)}
+              onClick={() => { setMode(null); setStep(0); }}
               style={{ background: "none", border: "none", fontSize: 13, color: "hsl(var(--text-muted))", cursor: "pointer", marginBottom: 12, padding: 0 }}
             >
               ← Tilbake
             </button>
-            <div className="ro-card" style={{ margin: "0 0 14px" }}>
-              <div className="card-title">Hva skjer i relasjonen akkurat nå?</div>
-              <div className="card-sub" style={{ marginBottom: 14 }}>
-                Skriv fritt — hva du kjenner, hva som skjedde, hva som er vanskelig.
-              </div>
-              <textarea
-                className="ro-textarea"
-                rows={7}
-                placeholder="Det som er vanskelig akkurat nå er..."
-                value={freeText}
-                onChange={e => setFreeText(e.target.value)}
-                style={{ marginBottom: 16 }}
-              />
-              <button
-                className="btn-primary"
-                onClick={finishFree}
-                disabled={freeText.trim().length < 10}
-                style={{ opacity: freeText.trim().length < 10 ? 0.5 : 1 }}
-              >
-                Lagre og avslutt
-              </button>
+
+            {/* Stegindikator */}
+            <div style={{ display: "flex", justifyContent: "center", gap: 8, padding: "4px 0 20px" }}>
+              {[0, 1, 2].map(i => (
+                <div key={i} style={{
+                  width: 8, height: 8, borderRadius: "50%",
+                  background: i <= step ? "#2A4A6A" : "hsl(var(--surface2))",
+                  opacity: i < step ? 0.4 : 1,
+                  transform: i === step ? "scale(1.25)" : "scale(1)",
+                  transition: "all 0.25s",
+                }} />
+              ))}
             </div>
+
+            {step === 0 && (
+              <div className="fade-up">
+                <div className="ro-card" style={{ margin: "0 0 14px" }}>
+                  <div style={{
+                    fontSize: 11, fontWeight: 600, letterSpacing: "1px",
+                    textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12,
+                  }}>
+                    Steg 1 — Hva kjenner du?
+                  </div>
+                  <div style={{
+                    fontFamily: "'Lora', serif", fontStyle: "italic",
+                    fontSize: 17, color: "#2A4A6A", lineHeight: 1.6, marginBottom: 16,
+                  }}>
+                    Stopp et øyeblikk. Hva kjenner du i kroppen og hjertet akkurat nå?
+                  </div>
+                  <textarea
+                    className="ro-textarea"
+                    rows={4}
+                    placeholder="Jeg kjenner..."
+                    value={feeling}
+                    onChange={e => setFeeling(e.target.value)}
+                    style={{ marginBottom: 16 }}
+                  />
+                  <button
+                    className="btn-primary"
+                    style={{ background: "#2A4A6A", opacity: feeling.trim().length < 3 ? 0.5 : 1 }}
+                    disabled={feeling.trim().length < 3}
+                    onClick={() => setStep(1)}
+                  >
+                    Neste →
+                  </button>
+                  <button className="btn-ghost" style={{ display: "block", width: "100%", textAlign: "center", marginTop: 8 }} onClick={() => setStep(1)}>
+                    Hopp over
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 1 && (
+              <div className="fade-up">
+                <div className="ro-card" style={{ margin: "0 0 14px" }}>
+                  <div style={{
+                    fontSize: 11, fontWeight: 600, letterSpacing: "1px",
+                    textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12,
+                  }}>
+                    Steg 2 — Hva skjedde?
+                  </div>
+                  <div style={{
+                    fontFamily: "'Lora', serif", fontStyle: "italic",
+                    fontSize: 17, color: "#2A4A6A", lineHeight: 1.6, marginBottom: 16,
+                  }}>
+                    Hva var det som skjedde? Beskriv situasjonen kort.
+                  </div>
+                  <textarea
+                    className="ro-textarea"
+                    rows={4}
+                    placeholder="Det som skjedde var..."
+                    value={what}
+                    onChange={e => setWhat(e.target.value)}
+                    style={{ marginBottom: 16 }}
+                  />
+                  <button
+                    className="btn-primary"
+                    style={{ background: "#2A4A6A", opacity: what.trim().length < 3 ? 0.5 : 1 }}
+                    disabled={what.trim().length < 3}
+                    onClick={() => setStep(2)}
+                  >
+                    Neste →
+                  </button>
+                  <button className="btn-ghost" style={{ display: "block", width: "100%", textAlign: "center", marginTop: 8 }} onClick={() => setStep(2)}>
+                    Hopp over
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="fade-up">
+                <div className="ro-card" style={{ margin: "0 0 14px" }}>
+                  <div style={{
+                    fontSize: 11, fontWeight: 600, letterSpacing: "1px",
+                    textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12,
+                  }}>
+                    Steg 3 — Et annet perspektiv
+                  </div>
+                  <div style={{
+                    fontFamily: "'Lora', serif", fontStyle: "italic",
+                    fontSize: 17, color: "#2A4A6A", lineHeight: 1.6, marginBottom: 16,
+                  }}>
+                    Er det mulig å se dette fra et annet ståsted — eller er det noe du ikke vet ennå?
+                  </div>
+                  <textarea
+                    className="ro-textarea"
+                    rows={4}
+                    placeholder="Det er mulig at... / Jeg vet ikke ennå om..."
+                    value={perspective}
+                    onChange={e => setPerspective(e.target.value)}
+                    style={{ marginBottom: 16 }}
+                  />
+                  <button
+                    className="btn-primary"
+                    style={{ background: "#2A4A6A" }}
+                    onClick={finishFree}
+                  >
+                    Avslutt økten
+                  </button>
+                  <button className="btn-ghost" style={{ display: "block", width: "100%", textAlign: "center", marginTop: 8 }} onClick={finishFree}>
+                    Avslutt uten å svare
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -171,7 +286,7 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
         {mode === "velg" && (
           <div className="fade-up">
             <button
-              onClick={() => setMode(null)}
+              onClick={() => { setMode(null); setStep(0); }}
               style={{ background: "none", border: "none", fontSize: 13, color: "hsl(var(--text-muted))", cursor: "pointer", marginBottom: 12, padding: 0 }}
             >
               ← Tilbake
@@ -181,22 +296,39 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
               <div className="fade-up">
                 <div className="ro-card" style={{ margin: "0 0 14px" }}>
                   <div className="card-title">Hva trigget deg?</div>
-                  <ChipSelector items={RELATION_TRIGS} selected={trigger} onSelect={setTrigger} storageKey="relation-trigs" />
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
+                    {[
+                      { id: "nomsg", label: "Melding uten svar" },
+                      { id: "distance", label: "Avstand eller kulde" },
+                      { id: "conflict", label: "Konflikt" },
+                      { id: "unclear", label: "Uklarhet eller tvetydighet" },
+                      { id: "longing", label: "Savn" },
+                      { id: "confirm", label: "Behov for bekreftelse" },
+                      { id: "rejected", label: "Følte meg avvist" },
+                    ].map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => setTrigger(t.id === trigger ? null : t.id)}
+                        style={{
+                          padding: "12px 16px",
+                          background: trigger === t.id ? "hsla(var(--green) / 0.08)" : "hsl(var(--surface))",
+                          border: `1.5px solid ${trigger === t.id ? "hsl(var(--green))" : "hsl(var(--surface2))"}`,
+                          borderRadius: "var(--radius-sm)",
+                          fontFamily: "'Nunito', sans-serif",
+                          fontSize: 14,
+                          color: trigger === t.id ? "hsl(var(--green))" : "hsl(var(--text-muted))",
+                          fontWeight: trigger === t.id ? 600 : 400,
+                          cursor: "pointer",
+                          textAlign: "left",
+                        }}
+                      >
+                        {trigger === t.id ? "✓ " : ""}{t.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 {trigger && (
                   <div className="fade-up">
-                    {trigger === "nomsg" && (
-                      <div className="ro-card" style={{ margin: "0 0 12px" }}>
-                        <div className="card-title">Melding uten svar</div>
-                        <div className="card-sub">Stillhet er ikke bevis på avvisning.</div>
-                        {["De er opptatt med noe annet", "De har kanskje ikke sett meldingen", "De sliter selv med noe", "Timingen var dårlig for dem"].map((e, i) => (
-                          <div key={i} className="insight-row">
-                            <div className="insight-dot" style={{ background: "hsl(var(--green))" }} />
-                            <div className="insight-text">{e}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                     <div className="ro-card" style={{ margin: "0 0 14px" }}>
                       <div className="card-title">Kartlegg reaksjonen</div>
                       <div style={{ marginBottom: 14 }}>
@@ -207,18 +339,16 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
                         <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Hva kan være alternative forklaringer?</div>
                         <textarea className="ro-textarea" rows={2} placeholder="Det er mulig at..." value={alternatives} onChange={e => setAlternatives(e.target.value)} />
                       </div>
-                      <div style={{ marginBottom: 4 }}>
-                        <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Er dette savn, skam, ensomhet, eller avvisningsfrykt?</div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Hva kjenner du under reaksjonen?</div>
                         <textarea className="ro-textarea" rows={2} placeholder="Det kjennes mest som..." value={feeling} onChange={e => setFeeling(e.target.value)} />
                       </div>
                     </div>
-                    {(interpretation.length > 0 || alternatives.length > 0 || feeling.length > 0) && (
-                      <button className="btn-primary" style={{ marginTop: 4 }} onClick={() => setStep(1)}>
-                        Trenger dette handling? →
-                      </button>
-                    )}
-                    <button className="btn-ghost" style={{ marginTop: 4 }} onClick={() => setStep(1)}>
-                      Hopp over refleksjon →
+                    <button className="btn-primary" onClick={() => setStep(1)}>
+                      Handling eller regulering? →
+                    </button>
+                    <button className="btn-ghost" style={{ display: "block", width: "100%", textAlign: "center", marginTop: 8 }} onClick={() => setStep(1)}>
+                      Hopp over
                     </button>
                   </div>
                 )}
