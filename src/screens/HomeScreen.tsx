@@ -84,63 +84,61 @@ export function HomeScreen({ onNav, db, addCheckin, addEveningEval }: HomeScreen
   return (
     <div className="fade-up">
 
-      {/* ── Onboarding popup ─────────────────────────────────── */}
-      {showOnboarding && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 200,
-          background: "rgba(0,0,0,0.35)",
-          display: "flex", alignItems: "flex-end", justifyContent: "center",
-        }}>
-          <div style={{
-            background: "hsl(var(--white))",
-            borderRadius: "var(--radius) var(--radius) 0 0",
-            padding: "32px 24px 40px",
-            width: "100%", maxWidth: 430,
-            animation: "fadeUp 0.3s ease forwards",
-          }}>
-            <div style={{
-              fontFamily: "'Lora', serif",
-              fontSize: 22,
-              color: "hsl(var(--green))",
-              marginBottom: 12,
-              lineHeight: 1.3,
-            }}>
-              Velkommen til Ro & Retning 🌿
-            </div>
-            <div style={{
-              fontSize: 14,
-              color: "hsl(var(--text-muted))",
-              lineHeight: 1.8,
-              marginBottom: 20,
-            }}>
-              Et stille sted å kjenne etter, bearbeide og finne tilbake til deg selv.
-              <br /><br />
-              Alle moduler er gratis å bruke. Med Plus får du AI-refleksjon etter hver økt — en personlig, varm tilbakemelding basert på det du har delt.
-            </div>
-            <button
-              className="btn-primary"
-              onClick={dismissOnboarding}
-            >
-              Kom i gang
-            </button>
-            <div style={{ textAlign: "center", marginTop: 14 }}>
-              <button
-                onClick={() => { dismissOnboarding(); navigate("/betaling"); }}
-                style={{
-                  background: "none", border: "none",
-                  fontFamily: "'Nunito', sans-serif",
-                  fontSize: 13, color: "#9B6B8A",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  textUnderlineOffset: 3,
-                }}
-              >
-                Nysgjerrig på Plus? Se hva du får →
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+{/* ── Onboarding popup ─────────────────────────────────── */}
+{showOnboarding && (
+  <div style={{
+    position: "fixed", inset: 0, zIndex: 200,
+    background: "rgba(0,0,0,0.35)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    padding: "0 24px",
+  }}>
+    <div style={{
+      background: "hsl(var(--white))",
+      borderRadius: "var(--radius)",
+      padding: "32px 24px 40px",
+      width: "100%", maxWidth: 390,
+      animation: "fadeUp 0.3s ease forwards",
+    }}>
+      <div style={{
+        fontFamily: "'Lora', serif",
+        fontSize: 22,
+        color: "hsl(var(--green))",
+        marginBottom: 12,
+        lineHeight: 1.3,
+      }}>
+        Velkommen til Ro & Retning 🌿
+      </div>
+      <div style={{
+        fontSize: 14,
+        color: "hsl(var(--text-muted))",
+        lineHeight: 1.8,
+        marginBottom: 20,
+      }}>
+        Et stille sted å kjenne etter, bearbeide og finne tilbake til deg selv.
+        <br /><br />
+        Alle moduler er gratis å bruke. Med Plus får du AI-refleksjon etter hver økt — en personlig, varm tilbakemelding basert på det du har delt.
+      </div>
+      <button className="btn-primary" onClick={dismissOnboarding}>
+        Kom i gang
+      </button>
+      <div style={{ textAlign: "center", marginTop: 14 }}>
+        <button
+          onClick={() => { dismissOnboarding(); navigate("/betaling"); }}
+          style={{
+            background: "none", border: "none",
+            fontFamily: "'Nunito', sans-serif",
+            fontSize: 13, color: "#9B6B8A",
+            cursor: "pointer",
+            textDecoration: "underline",
+            textUnderlineOffset: 3,
+          }}
+        >
+          Nysgjerrig på Plus? Se hva du får →
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* ── Header ───────────────────────────────────────────── */}
       <div style={{ padding: "52px 24px 20px" }}>
