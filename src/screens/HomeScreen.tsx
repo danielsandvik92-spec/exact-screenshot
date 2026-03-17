@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MOOD_META } from "@/lib/data";
 import { CheckinGraph } from "@/components/CheckinGraph";
@@ -24,6 +24,8 @@ export function HomeScreen({ onNav, db, addCheckin, addEveningEval }: HomeScreen
   const [eveningSaved, setEveningSaved] = useState(false);
   const [showEvening, setShowEvening] = useState(false);
 
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
   const checkins = db?.checkins || [];
   const eveningEvals = db?.eveningEvals || [];
 
@@ -33,6 +35,19 @@ export function HomeScreen({ onNav, db, addCheckin, addEveningEval }: HomeScreen
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "God morgen" : hour < 18 ? "God ettermiddag" : "God kveld";
+
+  useEffect(() => {
+    const seen = localStorage.getItem("rr-onboarding-seen");
+    if (!seen) {
+      const timeout = setTimeout(() => setShowOnboarding(true), 1200);
+      return () => clearTimeout(timeout);
+    }
+  }, []);
+
+  const dismissOnboarding = () => {
+    localStorage.setItem("rr-onboarding-seen", "true");
+    setShowOnboarding(false);
+  };
 
   const save = async () => {
     if (!mood || energy === null) return;
@@ -57,50 +72,84 @@ export function HomeScreen({ onNav, db, addCheckin, addEveningEval }: HomeScreen
     setEveningSaved(true);
   };
 
-const modules = [
-  { icon: "🌬️", title: "Akutt regulering", sub: "Når alarmen er høy", nav: "acute" as ScreenId, color: "#2D4A3E" },
-  { icon: "👥", title: "Etter sosiale situasjoner", sub: "Når tankene spinner etter å ha vært med folk", nav: "social" as ScreenId, color: "#9B6B8A" },
-  { icon: "🔥", title: "Når du er hard mot deg selv", sub: "Når du er din egen verste kritiker", nav: "critic" as ScreenId, color: "#7A5A3A" },
-  { icon: "💙", title: "Når relasjoner er vanskelige", sub: "Når noen nære gjør vondt eller skaper uro", nav: "relation" as ScreenId, color: "#3A5A7A" },
-  { icon: "🌱", title: "Hvem er du egentlig?", sub: "Hvem er du når du er rolig?", nav: "identity" as ScreenId, color: "#4A6A3A" },
-  { icon: "🫧", title: "Kjenn etter", sub: "Møt det som er der, uten å analysere", nav: "emotion" as ScreenId, color: "#4A3A6A" },
-];
+  const modules = [
+    { icon: "🌬️", title: "Akutt regulering", sub: "Når alarmen er høy", nav: "acute" as ScreenId, color: "#2D4A3E" },
+    { icon: "👥", title: "Etter sosiale situasjoner", sub: "Når tankene spinner etter å ha vært med folk", nav: "social" as ScreenId, color: "#9B6B8A" },
+    { icon: "🔥", title: "Når du er hard mot deg selv", sub: "Når du er din egen verste kritiker", nav: "critic" as ScreenId, color: "#7A5A3A" },
+    { icon: "💙", title: "Når relasjoner er vanskelige", sub: "Når noen nære gjør vondt eller skaper uro", nav: "relation" as ScreenId, color: "#3A5A7A" },
+    { icon: "🌱", title: "Hvem er du egentlig?", sub: "Hvem er du når du er rolig?", nav: "identity" as ScreenId, color: "#4A6A3A" },
+    { icon: "🫧", title: "Kjenn etter", sub: "Møt det som er der, uten å analysere", nav: "emotion" as ScreenId, color: "#4A3A6A" },
+  ];
 
   return (
     <div className="fade-up">
+
+      {/* ── Onboarding popup ─────────────────────────────────── */}
+      {showOnboarding && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          background: "rgba(0,0,0,0.35)",
+          display: "flex", alignItems: "flex-end", justifyContent: "center",
+        }}>
+          <div style={{
+            background: "hsl(var(--white))",
+            borderRadius: "var(--radius) var(--radius) 0 0",
+            padding: "32px 24px 40px",
+            width: "100%", maxWidth: 430,
+            animation: "fadeUp 0.3s ease forwards",
+          }}>
+            <div style={{
+              fontFamily: "'Lora', serif",
+              fontSize: 22,
+              color: "hsl(var(--green))",
+              marginBottom: 12,
+              lineHeight: 1.3,
+            }}>
+              Velkommen til Ro & Retning 🌿
+            </div>
+            <div style={{
+              fontSize: 14,
+              color: "hsl(var(--text-muted))",
+              lineHeight: 1.8,
+              marginBottom: 20,
+            }}>
+              Et stille sted å kjenne etter, bearbeide og finne tilbake til deg selv.
+              <br /><br />
+              Alle moduler er gratis å bruke. Med Plus får du AI-refleksjon etter hver økt — en personlig, varm tilbakemelding basert på det du har delt.
+            </div>
+            <button
+              className="btn-primary"
+              onClick={dismissOnboarding}
+            >
+              Kom i gang
+            </button>
+            <div style={{ textAlign: "center", marginTop: 14 }}>
+              <button
+                onClick={() => { dismissOnboarding(); navigate("/betaling"); }}
+                style={{
+                  background: "none", border: "none",
+                  fontFamily: "'Nunito', sans-serif",
+                  fontSize: 13, color: "#9B6B8A",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  textUnderlineOffset: 3,
+                }}
+              >
+                Nysgjerrig på Plus? Se hva du får →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Header ───────────────────────────────────────────── */}
       <div style={{ padding: "52px 24px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <div style={{ fontFamily: "'Lora', serif", fontSize: 26, color: "hsl(var(--green))", lineHeight: 1.2 }}>Ro & Retning</div>
             <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", marginTop: 2, fontWeight: 400 }}>{greeting}. Hva trenger du akkurat nå?</div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
-              <button
-                onClick={() => navigate("/bakgrunn")}
-                style={{
-                  background: "none", border: "none",
-                  fontFamily: "'Nunito', sans-serif", fontSize: "13px",
-                  color: "hsl(var(--text-muted))", cursor: "pointer",
-                  padding: 0, textDecoration: "underline", textUnderlineOffset: "3px",
-                }}
-              >
-                📖 Hvorfor appen er som den er
-              </button>
-              <button
-                onClick={() => navigate("/betaling")}
-                style={{
-                  background: "none", border: "none",
-                  fontFamily: "'Nunito', sans-serif", fontSize: "13px",
-                  color: "#9B6B8A", cursor: "pointer", padding: 0,
-                  textDecoration: "underline", textUnderlineOffset: "3px", fontWeight: 600,
-                }}
-              >
-                ⭐ Ro & Retning Plus
-              </button>
-            </div>
-            <div style={{ width: 40, height: 40, background: "hsl(var(--green))", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🌿</div>
-          </div>
+          <div style={{ width: 40, height: 40, background: "hsl(var(--green))", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🌿</div>
         </div>
       </div>
 
@@ -125,7 +174,6 @@ const modules = [
               <div className="divider" />
             </div>
           )}
-
           {checkinDoneToday && !saved ? (
             <div className="fade-up reframe-box" style={{ marginTop: 12 }}>
               Gjort for i dag. Ta vare på deg selv. 🌿
@@ -190,7 +238,6 @@ const modules = [
             )}
           </div>
           <div className="card-sub" style={{ marginTop: 4 }}>Tre minutter før du legger deg.</div>
-
           {eveningDoneToday && !eveningSaved ? (
             <div className="fade-up reframe-box" style={{ marginTop: 12 }}>
               Gjort for i kveld. Godt gjort. 🌿
@@ -249,6 +296,37 @@ const modules = [
           <div style={{ color: "hsl(var(--text-light))", fontSize: 18 }}>›</div>
         </div>
       ))}
+
+      {/* ── Info-rad ─────────────────────────────────────────── */}
+      <div style={{
+        display: "flex", justifyContent: "center", gap: 24,
+        padding: "20px 24px 32px",
+      }}>
+        <button
+          onClick={() => navigate("/bakgrunn")}
+          style={{
+            background: "none", border: "none",
+            fontFamily: "'Nunito', sans-serif", fontSize: 12,
+            color: "hsl(var(--text-light))", cursor: "pointer",
+            textDecoration: "underline", textUnderlineOffset: 3,
+          }}
+        >
+          📖 Om appen
+        </button>
+        <button
+          onClick={() => navigate("/betaling")}
+          style={{
+            background: "none", border: "none",
+            fontFamily: "'Nunito', sans-serif", fontSize: 12,
+            color: "#9B6B8A", cursor: "pointer",
+            textDecoration: "underline", textUnderlineOffset: 3,
+            fontWeight: 600,
+          }}
+        >
+          ⭐ Ro & Retning Plus
+        </button>
+      </div>
+
     </div>
   );
 }
