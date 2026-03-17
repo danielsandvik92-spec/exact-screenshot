@@ -57,14 +57,14 @@ useEffect(() => {
 
   const renderScreen = () => {
     switch (screen) {
-      case "home": return <HomeScreen onNav={setScreen} db={db} addCheckin={addCheckin} />;
+      case "home": return <HomeScreen onNav={setScreen} db={db} addCheckin={addCheckin} addEveningEval={addEveningEval} />;
       case "acute": return <AcuteScreen onBack={() => setScreen("home")} addSession={addAcuteSession} onEmotion={() => setScreen("emotion")} />;
       case "social": return <SocialScreen onBack={() => setScreen("home")} addSession={addSocialSession} />;
       case "critic": return <CriticScreen onBack={() => setScreen("home")} addSession={addCriticSession} />;
       case "relation": return <RelationScreen onBack={() => setScreen("home")} addSession={addRelationSession} />;
       case "identity": return <IdentityScreen onBack={() => setScreen("home")} />;
       case "emotion": return <EmotionScreen onBack={() => setScreen("home")} />;
-      case "patterns": return <PatternsScreen onBack={() => setScreen("home")} db={db} addEveningEval={addEveningEval} />;
+      case "patterns": return <PatternsScreen onBack={() => setScreen("home")} db={db} />;
       default: return <HomeScreen onNav={setScreen} db={db} addCheckin={addCheckin} />;
     }
   };
