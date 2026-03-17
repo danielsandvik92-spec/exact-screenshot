@@ -17,8 +17,13 @@ export async function getReflection(
 ): Promise<string> {
   if (!supabase) return randomFallback();
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
     const { data, error } = await supabase.functions.invoke("ai-reflect", {
       body: { context, systemPrompt },
+      headers: session ? {
+        Authorization: `Bearer ${session.access_token}`,
+      } : {},
     });
     if (error) throw error;
     return data?.text ?? randomFallback();
