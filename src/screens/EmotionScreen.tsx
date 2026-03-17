@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { BODY_AREAS, SURFACE_EMOTIONS } from "@/lib/data";
 import { ReflectionBubble } from "@/components/ReflectionBubble";
+import { ConfirmLeaveDialog } from "@/components/ConfirmLeaveDialog";
 
 interface EmotionScreenProps {
   onBack: () => void;
@@ -8,6 +9,7 @@ interface EmotionScreenProps {
 
 export function EmotionScreen({ onBack }: EmotionScreenProps) {
   const [step, setStep] = useState(0);
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const [bodyArea, setBodyArea] = useState<string | null>(null);
   const [intensity, setIntensity] = useState<number | null>(null);
   const [surfaceEmotion, setSurfaceEmotion] = useState<string | null>(null);
@@ -16,7 +18,6 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
   const [done, setDone] = useState(false);
   const [reflectionContext, setReflectionContext] = useState("");
 
-  // Sittesteg
   const [sitDuration, setSitDuration] = useState<number | null>(null);
   const [sitTimer, setSitTimer] = useState(0);
   const [sitRunning, setSitRunning] = useState(false);
@@ -24,6 +25,14 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
 
   const selected = SURFACE_EMOTIONS.find(e => e.id === surfaceEmotion);
   const bodyAreaLabel = BODY_AREAS.find(b => b.id === bodyArea)?.label || "kroppen";
+
+  const handleBack = () => {
+    if (step > 0) {
+      setConfirmLeave(true);
+    } else {
+      onBack();
+    }
+  };
 
   useEffect(() => {
     if (!sitRunning || sitDuration === null) return;
@@ -73,11 +82,7 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
             color="purple"
             autoFetch={true}
           />
-          <button
-            className="btn-primary"
-            style={{ background: "#4A3A6A", marginTop: 14 }}
-            onClick={onBack}
-          >
+          <button className="btn-primary" style={{ background: "#4A3A6A", marginTop: 14 }} onClick={onBack}>
             Gå tilbake
           </button>
         </div>
@@ -87,8 +92,14 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
 
   return (
     <div className="fade-up">
+      {confirmLeave && (
+        <ConfirmLeaveDialog
+          onConfirm={() => { setConfirmLeave(false); onBack(); }}
+          onCancel={() => setConfirmLeave(false)}
+        />
+      )}
       <div className="module-header" style={{ background: "linear-gradient(135deg, #3A2D5A, #4A3A6A)" }}>
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button className="back-btn" onClick={handleBack}>←</button>
         <h1>Kjenn etter</h1>
         <p>Ikke for å forstå — bare for å være til stede med det som er.</p>
       </div>
@@ -180,7 +191,6 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
                 Ikke løs noe. Ikke forstå noe. Bare la følelsen få lov til å være der — i kroppen, ikke i hodet.
               </div>
 
-              {/* Velg varighet */}
               {!sitRunning && !sitDone && (
                 <div className="fade-up">
                   <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", marginBottom: 10, textAlign: "center" }}>
@@ -192,52 +202,33 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
                       { label: "90 sek", seconds: 90 },
                       { label: "3 min", seconds: 180 },
                     ].map(opt => (
-                      <button
-                        key={opt.seconds}
-                        onClick={() => startSit(opt.seconds)}
-                        style={{
-                          flex: 1,
-                          padding: "12px 8px",
-                          background: "rgba(106,90,154,0.08)",
-                          border: "1.5px solid rgba(106,90,154,0.25)",
-                          borderRadius: "var(--radius-sm)",
-                          fontFamily: "'Nunito', sans-serif",
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: "#4A3A6A",
-                          cursor: "pointer",
-                          transition: "all 0.18s",
-                        }}
-                      >
+                      <button key={opt.seconds} onClick={() => startSit(opt.seconds)} style={{
+                        flex: 1, padding: "12px 8px",
+                        background: "rgba(106,90,154,0.08)",
+                        border: "1.5px solid rgba(106,90,154,0.25)",
+                        borderRadius: "var(--radius-sm)",
+                        fontFamily: "'Nunito', sans-serif",
+                        fontSize: 13, fontWeight: 600, color: "#4A3A6A",
+                        cursor: "pointer", transition: "all 0.18s",
+                      }}>
                         {opt.label}
                       </button>
                     ))}
                   </div>
-                  <button
-                    className="btn-ghost"
-                    style={{ display: "block", textAlign: "center", width: "100%", marginTop: 12 }}
-                    onClick={() => { setSitDone(true); }}
-                  >
+                  <button className="btn-ghost" style={{ display: "block", textAlign: "center", width: "100%", marginTop: 12 }} onClick={() => setSitDone(true)}>
                     Hopp over
                   </button>
                 </div>
               )}
 
-              {/* Nedtelling */}
               {sitRunning && !sitDone && (
                 <div className="fade-up" style={{ textAlign: "center" }}>
                   <div style={{
-                    width: 130,
-                    height: 130,
-                    borderRadius: "50%",
+                    width: 130, height: 130, borderRadius: "50%",
                     background: "radial-gradient(circle, #6A5A9A, #4A3A6A)",
                     margin: "20px auto",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "white",
-                    boxShadow: "0 0 50px rgba(106,90,154,0.25)",
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                    color: "white", boxShadow: "0 0 50px rgba(106,90,154,0.25)",
                     animation: "breathe37 8s ease-in-out infinite",
                   }}>
                     <div style={{ fontSize: 28, fontWeight: 700, lineHeight: 1 }}>{formatTime(sitTimer)}</div>
@@ -249,22 +240,14 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
                 </div>
               )}
 
-              {/* Ferdig */}
               {sitDone && (
                 <div className="fade-up" style={{ textAlign: "center" }}>
                   <div style={{
-                    width: 130,
-                    height: 130,
-                    borderRadius: "50%",
+                    width: 130, height: 130, borderRadius: "50%",
                     background: "radial-gradient(circle, #6A5A9A, #4A3A6A)",
                     margin: "20px auto",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "white",
-                    boxShadow: "0 0 50px rgba(106,90,154,0.15)",
-                    opacity: 0.7,
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                    color: "white", boxShadow: "0 0 50px rgba(106,90,154,0.15)", opacity: 0.7,
                   }}>
                     <div style={{ fontSize: 28 }}>🌿</div>
                   </div>
