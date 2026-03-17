@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MOOD_META } from "@/lib/data";
 import { CheckinGraph } from "@/components/CheckinGraph";
 import type { AppDB, EveningEvalEntry } from "@/lib/types";
+import { supabase } from "@/lib/supabase";
+import { getReflection } from "@/lib/useReflection";
+import { checkIsPlus } from "@/lib/supabase";
 
 function getWeekStart(date: Date) {
   const d = new Date(date);
@@ -35,11 +38,23 @@ interface PatternsScreenProps {
   addEveningEval: (entry: EveningEvalEntry) => Promise<void>;
 }
 
+interface PortraitEntry {
+  id: string;
+  session_date: string;
+  questions: string[];
+  answers: string[];
+  ai_insight: string;
+}
+
 export function PatternsScreen({ onBack, db, addEveningEval }: PatternsScreenProps) {
   const [tab, setTab] = useState(0);
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
   const [q1, setQ1] = useState(""); const [q2, setQ2] = useState(""); const [q3, setQ3] = useState("");
   const [eveningSaved, setEveningSaved] = useState(false);
+  const [portrait, setPortrait] = useState<PortraitEntry[]>([]);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [isPlus, setIsPlus] = useState(false);
 
   const checkins = db?.checkins || [];
   const eveningEvals = db?.eveningEvals || [];
@@ -72,6 +87,38 @@ export function PatternsScreen({ onBack, db, addEveningEval }: PatternsScreenPro
   const allTimeMoodCounts = checkins.reduce<Record<string, number>>((acc, c) => { acc[c.mood] = (acc[c.mood] || 0) + 1; return acc; }, {});
   const allTimeAvg = checkins.length > 0 ? (checkins.reduce((a, b) => a + b.energy, 0) / checkins.length).toFixed(1) : null;
 
+  useEffect(() => {
+    checkIsPlus().then(setIsPlus);
+    loadPortrait();
+  }, []);
+
+  const loadPortrait = async () => {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase
+      .from("identity_portrait")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("session_date", { ascending: false });
+    if (data) setPortrait(data);
+  };
+
+  const generateSummary = async () => {
+    if (portrait.length === 0) return;
+    setSummaryLoading(true);
+    const context = portrait.map((e, i) =>
+      `Økt ${i + 1} (${new Date(e.session_date).toLocaleDateString("nb-NO")}):\n${e.ai_insight}`
+    ).join("\n\n");
+
+    const result = await getReflection(
+      context,
+      "Du er en varm psykolog som leser gjennom flere identitetsøkter fra samme person over tid. Oppsummer de viktigste mønstrene du ser på tvers av øktene — hva går igjen, hva ser ut til å være kjernen i denne personen? Skriv et kort, varmt og presist portrett på 4-6 setninger. Ikke analyser, men beskriv hva du hører. Skriv på norsk."
+    );
+    setSummary(result);
+    setSummaryLoading(false);
+  };
+
   const saveEvening = async () => {
     const now = new Date();
     const entry: EveningEvalEntry = { date: `${now.getDate()}/${now.getMonth() + 1}`, q1, q2, q3, ts: now.toISOString() };
@@ -80,13 +127,13 @@ export function PatternsScreen({ onBack, db, addEveningEval }: PatternsScreenPro
     setQ1(""); setQ2(""); setQ3("");
   };
 
-  const TABS = ["Ukesrapport", "Alle data", "Kveld"];
+  const TABS = ["Ukesrapport", "Alle data", "Identitet", "Kveld"];
 
   return (
     <div className="fade-up">
       <div className="module-header" style={{ background: "hsl(var(--text))" }}>
         <button className="back-btn" onClick={onBack}>←</button>
-        <h1>Mønsterkart</h1>
+        <h1>Dine mønstre</h1>
         <p>Se mønstre, følg utvikling, del med psykolog.</p>
       </div>
 
@@ -165,7 +212,7 @@ export function PatternsScreen({ onBack, db, addEveningEval }: PatternsScreenPro
             </div>
 
             {Object.keys(acuteCounts).length > 0 && (
-              <div className="ro-card" style={{ margin: "0 0 14px" }}>
+              <div className="ro-card" style={{ margin: "14px 0" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 10 }}>🌀 Akutte triggere denne uken</div>
                 {Object.entries(acuteCounts).sort((a, b) => b[1] - a[1]).map(([symptom, count], i) => (
                   <div key={i} style={{ marginBottom: 10 }}>
@@ -178,26 +225,6 @@ export function PatternsScreen({ onBack, db, addEveningEval }: PatternsScreenPro
                     </div>
                   </div>
                 ))}
-                {weekAcute.length > 0 && (() => {
-                  const avgBefore = weekAcute.reduce((a, b) => a + (b.intensityBefore || 0), 0) / weekAcute.length;
-                  const avgAfter = weekAcute.reduce((a, b) => a + (b.intensityAfter || 0), 0) / weekAcute.length;
-                  return (
-                    <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
-                      <div style={{ flex: 1, background: "hsl(var(--surface))", borderRadius: 8, padding: "8px 10px", textAlign: "center" }}>
-                        <div style={{ fontSize: 16, fontWeight: 600, color: "hsl(var(--terra))" }}>{avgBefore.toFixed(1)}</div>
-                        <div style={{ fontSize: 9, color: "hsl(var(--text-light))" }}>Snitt før</div>
-                      </div>
-                      <div style={{ flex: 1, background: "hsl(var(--surface))", borderRadius: 8, padding: "8px 10px", textAlign: "center" }}>
-                        <div style={{ fontSize: 16, fontWeight: 600, color: "hsl(var(--green))" }}>{avgAfter.toFixed(1)}</div>
-                        <div style={{ fontSize: 9, color: "hsl(var(--text-light))" }}>Snitt etter</div>
-                      </div>
-                      <div style={{ flex: 1, background: "hsla(var(--green) / 0.08)", borderRadius: 8, padding: "8px 10px", textAlign: "center" }}>
-                        <div style={{ fontSize: 16, fontWeight: 600, color: "hsl(var(--green))" }}>-{Math.max(0, (avgBefore - avgAfter)).toFixed(1)}</div>
-                        <div style={{ fontSize: 9, color: "hsl(var(--text-light))" }}>Snitt nedgang</div>
-                      </div>
-                    </div>
-                  );
-                })()}
               </div>
             )}
 
@@ -264,6 +291,89 @@ export function PatternsScreen({ onBack, db, addEveningEval }: PatternsScreenPro
         )}
 
         {tab === 2 && (
+          <div className="fade-up">
+            {portrait.length === 0 ? (
+              <div className="ro-card">
+                <div className="card-title">Portrettet ditt er tomt ennå</div>
+                <div className="card-sub">
+                  Fullfør en økt i "Hvem er du egentlig?" så begynner portrettet ditt å ta form.
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="ro-card" style={{ margin: "0 0 14px", background: "rgba(58,90,42,0.05)", border: "1px solid rgba(58,90,42,0.15)" }}>
+                  <div className="card-title">Ditt identitetsportrett</div>
+                  <div className="card-sub" style={{ marginBottom: 16 }}>
+                    Basert på {portrait.length} økt{portrait.length > 1 ? "er" : ""} — med dine egne ord.
+                  </div>
+
+                  {isPlus ? (
+                    <>
+                      {summary ? (
+                        <div style={{
+                          fontFamily: "'Lora', serif",
+                          fontStyle: "italic",
+                          fontSize: 15,
+                          color: "hsl(var(--green))",
+                          lineHeight: 1.8,
+                          padding: "16px",
+                          background: "white",
+                          borderRadius: 12,
+                          marginBottom: 12,
+                        }}>
+                          {summary}
+                        </div>
+                      ) : (
+                        <button
+                          className="btn-primary"
+                          onClick={generateSummary}
+                          disabled={summaryLoading}
+                          style={{ opacity: summaryLoading ? 0.7 : 1 }}
+                        >
+                          {summaryLoading ? "Genererer portrett..." : "🌿 Generer levende portrett"}
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", fontStyle: "italic" }}>
+                      Oppgrader til Plus for å få et AI-generert sammendrag av hvem du er på tvers av alle øktene.
+                    </div>
+                  )}
+                </div>
+
+                {portrait.map((entry) => (
+                  <div key={entry.id} className="ro-card" style={{ margin: "0 0 14px" }}>
+                    <div style={{
+                      fontSize: 11, fontWeight: 600, letterSpacing: "1px",
+                      textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12,
+                    }}>
+                      {new Date(entry.session_date).toLocaleDateString("nb-NO", {
+                        day: "numeric", month: "long", year: "numeric"
+                      })}
+                    </div>
+
+                    {entry.ai_insight && (
+                      <div style={{
+                        fontFamily: "'Lora', serif",
+                        fontStyle: "italic",
+                        fontSize: 14,
+                        color: "hsl(var(--green))",
+                        lineHeight: 1.7,
+                        marginBottom: 12,
+                        paddingLeft: 12,
+                        borderLeft: "3px solid hsl(var(--green))",
+                      }}>
+                        {entry.ai_insight}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        )}
+
+        {tab === 3 && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "0 0 14px" }}>
               <div className="card-title">Kveldsevaluering</div>
