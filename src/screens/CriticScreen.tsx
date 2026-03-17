@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { CRITIC_VOICES } from "@/lib/data";
 import { AddCustomRow } from "@/components/AddCustomRow";
 import { ReflectionBubble } from "@/components/ReflectionBubble";
+import { ConfirmLeaveDialog } from "@/components/ConfirmLeaveDialog";
 import { sGet, sSet } from "@/lib/storage";
 import type { CriticSessionEntry } from "@/lib/types";
 
@@ -18,22 +19,20 @@ interface CriticScreenProps {
 }
 
 export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const [mode, setMode] = useState<"choose" | "structured" | "free" | null>("choose");
   const [step, setStep] = useState(0);
 
-  // Strukturert
   const [chosen, setChosen] = useState<string | null>(null);
   const [whoSoundsLike, setWhoSoundsLike] = useState("");
   const [whatINeed, setWhatINeed] = useState("");
   const [achievement, setAchievement] = useState("");
   const [customVoices, setCustomVoices] = useState<CriticVoice[]>([]);
 
-  // Fri
   const [freeVoice, setFreeVoice] = useState("");
   const [freeOrigin, setFreeOrigin] = useState("");
   const [freeNeed, setFreeNeed] = useState("");
 
-  // Felles
   const [done, setDone] = useState(false);
   const [reflectionContext, setReflectionContext] = useState("");
 
@@ -49,8 +48,15 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
 
   const allVoices = [...CRITIC_VOICES, ...customVoices];
   const selected = allVoices.find(v => v.id === chosen);
-
   const totalSteps = 3;
+
+  const handleBack = () => {
+    if (mode !== "choose") {
+      setConfirmLeave(true);
+    } else {
+      onBack();
+    }
+  };
 
   const finish = async () => {
     const context = mode === "free"
@@ -69,10 +75,8 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
     setDone(true);
   };
 
-  // ── Done-skjerm ───────────────────────────────────────────────
   if (done) {
     const closingMessage = selected?.closing || "Det du hører er ikke hele bildet av deg.";
-
     return (
       <div className="fade-up">
         <div className="module-header" style={{ background: "hsl(var(--critic-brown))" }}>
@@ -109,8 +113,14 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
 
   return (
     <div className="fade-up">
+      {confirmLeave && (
+        <ConfirmLeaveDialog
+          onConfirm={() => { setConfirmLeave(false); onBack(); }}
+          onCancel={() => setConfirmLeave(false)}
+        />
+      )}
       <div className="module-header" style={{ background: "hsl(var(--critic-brown))" }}>
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button className="back-btn" onClick={handleBack}>←</button>
         <h1>Når du er hard mot deg selv</h1>
         <p>Kritikeren er en strategi, ikke sannheten om deg.</p>
       </div>
@@ -124,7 +134,6 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
           </div>
         )}
 
-        {/* ── Velg inngang ───────────────────────────────────── */}
         {mode === "choose" && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
@@ -154,7 +163,6 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
           </div>
         )}
 
-        {/* ── STRUKTURERT ────────────────────────────────────── */}
         {mode === "structured" && step === 0 && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
@@ -162,11 +170,7 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
               <div className="card-sub">Velg det som kjennes nærmest — eller legg til din egen.</div>
               <div className="chip-grid">
                 {allVoices.map(v => (
-                  <div
-                    key={v.id}
-                    className={`ro-chip ${chosen === v.id ? "selected" : ""}`}
-                    onClick={() => setChosen(v.id)}
-                  >
+                  <div key={v.id} className={`ro-chip ${chosen === v.id ? "selected" : ""}`} onClick={() => setChosen(v.id)}>
                     {v.label}
                   </div>
                 ))}
@@ -177,9 +181,7 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
               <div className="fade-up">
                 <div className="ro-card" style={{ margin: "12px 0 0" }}>
                   <div className="card-title">Det som egentlig skjer</div>
-                  <div className="card-sub" style={{ marginBottom: 12 }}>
-                    Kritikeren snakker ikke sant — den er redd.
-                  </div>
+                  <div className="card-sub" style={{ marginBottom: 12 }}>Kritikeren snakker ikke sant — den er redd.</div>
                   <div className="critic-translate">
                     <div className="critic-box">
                       <div style={{ fontSize: 11, fontWeight: 600, marginBottom: 6, opacity: 0.7 }}>STEMMEN SIER</div>
@@ -208,33 +210,19 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
               <div className="card-title">Kjenner du igjen denne stemmen?</div>
               <div className="card-sub">Tenk tilbake — hvem sa slike ting til deg, eller hvem viste deg at du måtte være slik?</div>
-              <textarea
-                className="ro-textarea"
-                rows={3}
-                placeholder="Denne stemmen ligner på..."
-                value={whoSoundsLike}
-                onChange={e => setWhoSoundsLike(e.target.value)}
-              />
+              <textarea className="ro-textarea" rows={3} placeholder="Denne stemmen ligner på..." value={whoSoundsLike} onChange={e => setWhoSoundsLike(e.target.value)} />
             </div>
             <div className="ro-card" style={{ margin: "0" }}>
               <div className="card-title">Hva trenger den delen av deg?</div>
               <div className="card-sub">Den delen som hører disse ordene — hva trenger den egentlig?</div>
-              <textarea
-                className="ro-textarea"
-                rows={4}
-                placeholder="Det jeg egentlig trenger er..."
-                value={whatINeed}
-                onChange={e => setWhatINeed(e.target.value)}
-              />
+              <textarea className="ro-textarea" rows={4} placeholder="Det jeg egentlig trenger er..." value={whatINeed} onChange={e => setWhatINeed(e.target.value)} />
             </div>
             {whatINeed.length > 5 && (
               <div className="fade-up">
                 <div className="reframe-box">{whatINeed}</div>
               </div>
             )}
-            <button className="btn-primary" style={{ marginTop: 14 }} onClick={() => setStep(2)}>
-              Videre →
-            </button>
+            <button className="btn-primary" style={{ marginTop: 14 }} onClick={() => setStep(2)}>Videre →</button>
           </div>
         )}
 
@@ -242,49 +230,26 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
               <div className="card-title">Noe kritikeren aldri gir deg credit for</div>
-              <div className="card-sub">
-                Tenk på noe du faktisk har fått til — stort eller lite. Noe kritikeren aldri nevner.
-              </div>
-              <textarea
-                className="ro-textarea"
-                rows={4}
-                placeholder="Noe jeg faktisk har fått til er..."
-                value={achievement}
-                onChange={e => setAchievement(e.target.value)}
-              />
+              <div className="card-sub">Tenk på noe du faktisk har fått til — stort eller lite. Noe kritikeren aldri nevner.</div>
+              <textarea className="ro-textarea" rows={4} placeholder="Noe jeg faktisk har fått til er..." value={achievement} onChange={e => setAchievement(e.target.value)} />
             </div>
             <div className="reframe-box">
               Det du nettopp skrev er like sant som det kritikeren sier — men mye sjeldnere sagt.
             </div>
-            <button className="btn-primary" style={{ marginTop: 14 }} onClick={finish}>
-              Avslutt
-            </button>
+            <button className="btn-primary" style={{ marginTop: 14 }} onClick={finish}>Avslutt</button>
           </div>
         )}
 
-        {/* ── FRI UTFORSKNING ────────────────────────────────── */}
         {mode === "free" && step === 0 && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
               <div className="card-title">Hva sier stemmen inni deg nå?</div>
-              <div className="card-sub">
-                Ikke kategoriser det — bare skriv det akkurat slik det høres ut inni deg.
-              </div>
-              <textarea
-                className="ro-textarea"
-                rows={6}
-                placeholder="Stemmen sier at jeg..."
-                value={freeVoice}
-                onChange={e => setFreeVoice(e.target.value)}
-              />
+              <div className="card-sub">Ikke kategoriser det — bare skriv det akkurat slik det høres ut inni deg.</div>
+              <textarea className="ro-textarea" rows={6} placeholder="Stemmen sier at jeg..." value={freeVoice} onChange={e => setFreeVoice(e.target.value)} />
             </div>
-            <div className="reframe-box">
-              Det du hører er ikke hele bildet av deg.
-            </div>
+            <div className="reframe-box">Det du hører er ikke hele bildet av deg.</div>
             {freeVoice.length > 10 && (
-              <button className="btn-primary" style={{ marginTop: 12 }} onClick={() => setStep(1)}>
-                Videre →
-              </button>
+              <button className="btn-primary" style={{ marginTop: 12 }} onClick={() => setStep(1)}>Videre →</button>
             )}
           </div>
         )}
@@ -293,23 +258,11 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
               <div className="card-title">Kjenner du igjen denne stemmen?</div>
-              <div className="card-sub">
-                Ikke alle gjør det — men noen ganger har stemmen lært seg dette fra noe eller noen. Hva tenker du?
-              </div>
-              <textarea
-                className="ro-textarea"
-                rows={4}
-                placeholder="Denne stemmen minner meg om..."
-                value={freeOrigin}
-                onChange={e => setFreeOrigin(e.target.value)}
-              />
+              <div className="card-sub">Ikke alle gjør det — men noen ganger har stemmen lært seg dette fra noe eller noen. Hva tenker du?</div>
+              <textarea className="ro-textarea" rows={4} placeholder="Denne stemmen minner meg om..." value={freeOrigin} onChange={e => setFreeOrigin(e.target.value)} />
             </div>
-            <div className="reframe-box">
-              Det som kom utenfra en gang, er ikke det du er inni.
-            </div>
-            <button className="btn-primary" style={{ marginTop: 12 }} onClick={() => setStep(2)}>
-              Videre →
-            </button>
+            <div className="reframe-box">Det som kom utenfra en gang, er ikke det du er inni.</div>
+            <button className="btn-primary" style={{ marginTop: 12 }} onClick={() => setStep(2)}>Videre →</button>
           </div>
         )}
 
@@ -317,25 +270,15 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
               <div className="card-title">Hva trenger den delen av deg?</div>
-              <div className="card-sub">
-                Den delen som hører disse ordene — hva trenger den egentlig nå?
-              </div>
-              <textarea
-                className="ro-textarea"
-                rows={5}
-                placeholder="Det jeg egentlig trenger er..."
-                value={freeNeed}
-                onChange={e => setFreeNeed(e.target.value)}
-              />
+              <div className="card-sub">Den delen som hører disse ordene — hva trenger den egentlig nå?</div>
+              <textarea className="ro-textarea" rows={5} placeholder="Det jeg egentlig trenger er..." value={freeNeed} onChange={e => setFreeNeed(e.target.value)} />
             </div>
             {freeNeed.length > 5 && (
               <div className="fade-up">
                 <div className="reframe-box">{freeNeed}</div>
               </div>
             )}
-            <button className="btn-primary" style={{ marginTop: 14 }} onClick={finish}>
-              Avslutt
-            </button>
+            <button className="btn-primary" style={{ marginTop: 14 }} onClick={finish}>Avslutt</button>
           </div>
         )}
 
