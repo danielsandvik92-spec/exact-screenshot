@@ -10,13 +10,27 @@ interface AcuteScreenProps {
   onEmotion?: () => void;
 }
 
+const BREATH_DURATIONS: Record<string, number> = {
+  inn1: 3,
+  inn2: 1,
+  ut: 7,
+  pause: 1,
+};
+
+const BREATH_NEXT: Record<string, string> = {
+  inn1: "inn2",
+  inn2: "ut",
+  ut: "pause",
+  pause: "inn1",
+};
+
 export function AcuteScreen({ onBack, addSession, onEmotion }: AcuteScreenProps) {
   const [step, setStep] = useState(0);
   const [chosen, setChosen] = useState<string | null>(null);
   const [breathStep, setBreathStep] = useState("inn1");
   const [intensityBefore, setIntensityBefore] = useState<number | null>(null);
   const [intensityAfter, setIntensityAfter] = useState<number | null>(null);
-  const [timer, setTimer] = useState(3);
+  const [timer, setTimer] = useState(BREATH_DURATIONS["inn1"]);
   const [breathCount, setBreathCount] = useState(0);
   const [g1, setG1] = useState("");
   const [g2, setG2] = useState("");
@@ -24,31 +38,26 @@ export function AcuteScreen({ onBack, addSession, onEmotion }: AcuteScreenProps)
   const [done, setDone] = useState(false);
   const [reflectionContext, setReflectionContext] = useState("");
 
+  // Single unified breathing effect — avoids race condition between two competing effects
   useEffect(() => {
     if (step !== 1) return;
-    if (breathStep === "inn1") setTimer(3);
-    else if (breathStep === "inn2") setTimer(1);
-    else if (breathStep === "ut") setTimer(7);
-    else if (breathStep === "pause") setTimer(1);
-  }, [breathStep, step]);
 
-  useEffect(() => {
-    if (step !== 1) return;
+    // Set timer for current breath step on entry
+    setTimer(BREATH_DURATIONS[breathStep]);
+
     const iv = setInterval(() => {
       setTimer(t => {
         if (t <= 1) {
+          const nextStep = BREATH_NEXT[breathStep];
           setBreathCount(c => c + 1);
-          setBreathStep(s => {
-            if (s === "inn1") return "inn2";
-            if (s === "inn2") return "ut";
-            if (s === "ut") return "pause";
-            return "inn1";
-          });
-          return 0;
+          setBreathStep(nextStep);
+          // Return the duration of the NEXT step immediately so we never hit 0
+          return BREATH_DURATIONS[nextStep];
         }
         return t - 1;
       });
     }, 1000);
+
     return () => clearInterval(iv);
   }, [step, breathStep]);
 
