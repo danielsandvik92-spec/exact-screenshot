@@ -10,15 +10,15 @@ export const ACUTE = [
 ];
 
 export const CRITIC_VOICES = [
-  { id: "toomuch", label: "Du er for mye", fear: "Jeg er redd for å bli avvist hvis jeg viser meg fullt ut." },
-  { id: "notenough", label: "Du er ikke nok", fear: "Jeg er redd for ikke å strekke til eller bli funnet utilstrekkelig." },
-  { id: "nolikes", label: "Folk liker deg ikke", fear: "Jeg er redd for å være uønsket eller usynlig for andre." },
-  { id: "tookspace", label: "Du tok for mye plass", fear: "Jeg er redd for å være til bry eller byrde for andre." },
-  { id: "shouldbetter", label: "Du burde vært bedre", fear: "Jeg er redd for å ikke leve opp til egne eller andres forventninger." },
-  { id: "destroys", label: "Du ødelegger ting", fear: "Jeg er redd for å skade relasjoner eller situasjoner jeg bryr meg om." },
-  { id: "dontfit", label: "Du passer ikke inn", fear: "Jeg er redd for å alltid stå litt utenfor, aldri helt høre til." },
-  { id: "wrong", label: "Noe er galt med deg", fear: "Jeg er redd for at jeg på et grunnleggende nivå er annerledes eller feil." },
-  { id: "weak", label: "Du er svak", fear: "Jeg er redd for at følelsene mine er en svakhet som andre vil dømme." },
+  { id: "toomuch", label: "Du er for mye", fear: "Jeg er redd for å bli avvist hvis jeg viser meg fullt ut.", closing: "Det finnes folk som vil ha akkurat deg — ikke en dempet versjon av deg." },
+  { id: "notenough", label: "Du er ikke nok", fear: "Jeg er redd for ikke å strekke til eller bli funnet utilstrekkelig.", closing: "Du trenger ikke bevise verdien din. Den er ikke noe du tjener opp." },
+  { id: "nolikes", label: "Folk liker deg ikke", fear: "Jeg er redd for å være uønsket eller usynlig for andre.", closing: "En tanke om at folk ikke liker deg er ikke det samme som at det er sant." },
+  { id: "tookspace", label: "Du tok for mye plass", fear: "Jeg er redd for å være til bry eller byrde for andre.", closing: "Å ta plass er ikke det samme som å ta noe fra andre." },
+  { id: "shouldbetter", label: "Du burde vært bedre", fear: "Jeg er redd for å ikke leve opp til egne eller andres forventninger.", closing: "Du gjør så godt du kan med det du har akkurat nå. Det er nok." },
+  { id: "destroys", label: "Du ødelegger ting", fear: "Jeg er redd for å skade relasjoner eller situasjoner jeg bryr meg om.", closing: "Det at du bryr deg så mye er ikke en svakhet — det er kjærlighet." },
+  { id: "dontfit", label: "Du passer ikke inn", fear: "Jeg er redd for å alltid stå litt utenfor, aldri helt høre til.", closing: "Å føle seg utenfor betyr ikke at du ikke hører hjemme et sted." },
+  { id: "wrong", label: "Noe er galt med deg", fear: "Jeg er redd for at jeg på et grunnleggende nivå er annerledes eller feil.", closing: "Det som føles som en feil ved deg er ofte et sår som aldri fikk heles ordentlig." },
+  { id: "weak", label: "Du er svak", fear: "Jeg er redd for at følelsene mine er en svakhet som andre vil dømme.", closing: "Det å kjenne på noe er ikke svakhet — det er mot." },
 ];
 
 export const SOCIAL_CATS = [
