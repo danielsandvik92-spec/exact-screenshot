@@ -55,7 +55,7 @@ useEffect(() => {
   { icon: "📊", label: "Mønstre", id: "patterns" as ScreenId },
 ];
 
-  const renderScreen = () => {
+const renderScreen = () => {
     switch (screen) {
       case "home": return <HomeScreen onNav={setScreen} db={db} addCheckin={addCheckin} addEveningEval={addEveningEval} />;
       case "acute": return <AcuteScreen onBack={() => setScreen("home")} addSession={addAcuteSession} onEmotion={() => setScreen("emotion")} />;
@@ -65,7 +65,7 @@ useEffect(() => {
       case "identity": return <IdentityScreen onBack={() => setScreen("home")} />;
       case "emotion": return <EmotionScreen onBack={() => setScreen("home")} />;
       case "patterns": return <PatternsScreen onBack={() => setScreen("home")} db={db} />;
-      default: return <HomeScreen onNav={setScreen} db={db} addCheckin={addCheckin} />;
+      default: return <HomeScreen onNav={setScreen} db={db} addCheckin={addCheckin} addEveningEval={addEveningEval} />;
     }
   };
 
