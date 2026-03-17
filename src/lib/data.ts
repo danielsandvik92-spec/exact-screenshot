@@ -87,3 +87,12 @@ export const SURFACE_EMOTIONS = [
   { id: "overveldet", label: "Overveldet", under: "Hva er det som er for mye akkurat nå?" },
   { id: "annet", label: "Noe annet", under: "Hva kjenner du — beskriv det gjerne i egne ord." },
 ];
+
+export const REFRAMES_SOCIAL = [
+  "Jeg trenger ikke vite hva andre tenkte — jeg vet hva jeg mente.",
+  "Det er lov å ta plass i en samtale.",
+  "En awkward pause betyr ikke at jeg sa noe galt.",
+  "Jeg husker dette mye bedre enn de gjør.",
+  "Å bry seg om andre er ikke en svakhet.",
+  "Jeg var der. Det var nok.",
+];
