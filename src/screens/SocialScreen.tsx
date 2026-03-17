@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SOCIAL_CATS, REFRAMES_SOCIAL } from "@/lib/data";
 import { ChipSelector } from "@/components/ChipSelector";
 import { ReflectionBubble } from "@/components/ReflectionBubble";
+import { ConfirmLeaveDialog } from "@/components/ConfirmLeaveDialog";
 import type { SocialSessionEntry } from "@/lib/types";
 
 interface SocialScreenProps {
@@ -10,6 +11,7 @@ interface SocialScreenProps {
 }
 
 export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const [mode, setMode] = useState<"choose" | "free" | "guided" | null>("choose");
   const [step, setStep] = useState(0);
 
@@ -25,6 +27,14 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
   const [reflectionContext, setReflectionContext] = useState("");
 
   const totalSteps = 3;
+
+  const handleBack = () => {
+    if (mode !== "choose") {
+      setConfirmLeave(true);
+    } else {
+      onBack();
+    }
+  };
 
   const finish = async () => {
     const context = mode === "free"
@@ -70,8 +80,14 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
 
   return (
     <div className="fade-up">
+      {confirmLeave && (
+        <ConfirmLeaveDialog
+          onConfirm={() => { setConfirmLeave(false); onBack(); }}
+          onCancel={() => setConfirmLeave(false)}
+        />
+      )}
       <div className="module-header" style={{ background: "hsl(var(--terra))" }}>
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button className="back-btn" onClick={handleBack}>←</button>
         <h1>Etter sosiale situasjoner</h1>
         <p>For når hodet ikke vil la det gå.</p>
       </div>
@@ -85,7 +101,6 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
           </div>
         )}
 
-        {/* ── Velg inngang ─────────────────────────────────────── */}
         {mode === "choose" && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
@@ -115,7 +130,6 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
           </div>
         )}
 
-        {/* ── FRI SKRIVING ─────────────────────────────────────── */}
         {mode === "free" && step === 0 && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
@@ -204,7 +218,6 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
           </div>
         )}
 
-        {/* ── GUIDED ───────────────────────────────────────────── */}
         {mode === "guided" && step === 0 && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
