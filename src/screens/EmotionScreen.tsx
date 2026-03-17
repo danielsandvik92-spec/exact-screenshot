@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BODY_AREAS, SURFACE_EMOTIONS } from "@/lib/data";
+import { ReflectionBubble } from "@/components/ReflectionBubble";
 
 interface EmotionScreenProps {
   onBack: () => void;
@@ -13,15 +14,40 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
   const [freeText, setFreeText] = useState("");
   const [deeperText, setDeeperText] = useState("");
   const [done, setDone] = useState(false);
+  const [reflectionContext, setReflectionContext] = useState("");
 
   const selected = SURFACE_EMOTIONS.find(e => e.id === surfaceEmotion);
+  const bodyAreaLabel = BODY_AREAS.find(b => b.id === bodyArea)?.label || "kroppen";
+
+  const finish = () => {
+    setReflectionContext(
+      `Brukeren kjente noe i ${bodyAreaLabel} (intensitet ${intensity}/10). Overflate-følelse: "${selected?.label || "ukjent"}". Det de skrev: "${freeText || "ingenting"}". Dypere lag: "${deeperText || "ingenting"}".`
+    );
+    setDone(true);
+  };
 
   if (done) {
     return (
-      <div className="fade-up" style={{ padding: "0 16px 24px" }}>
-        <div className="ro-card" style={{ margin: "80px 0 0" }}>
-          <div className="reframe-box" style={{ borderLeftColor: "#6A5A9A" }}>Du tok deg tid til å kjenne etter. Det er ikke lite. 🌿</div>
-          <button className="btn-primary" style={{ marginTop: 14, background: "#4A3A6A" }} onClick={onBack}>Gå tilbake</button>
+      <div className="fade-up">
+        <div className="module-header" style={{ background: "linear-gradient(135deg, #3A2D5A, #4A3A6A)" }}>
+          <button className="back-btn" onClick={onBack}>←</button>
+          <h1>Kjenn etter</h1>
+          <p>Ikke for å forstå — bare for å være til stede med det som er.</p>
+        </div>
+        <div style={{ padding: "16px" }}>
+          <ReflectionBubble
+            context={reflectionContext}
+            systemPrompt="Du er en varm, stille støtteperson. Brukeren har nettopp tatt seg tid til å kjenne etter — vært til stede med noe inni seg uten å prøve å løse det. Det er modig og sjeldent. Les hva de delte med stor varsomhet. Ikke analyser, ikke forklar, ikke oppmuntre med tomme ord. Si noe stille og sant om det de sitter med. Skriv på norsk, 2-3 setninger."
+            color="purple"
+            autoFetch={true}
+          />
+          <button
+            className="btn-primary"
+            style={{ background: "#4A3A6A", marginTop: 14 }}
+            onClick={onBack}
+          >
+            Gå tilbake
+          </button>
         </div>
       </div>
     );
@@ -125,7 +151,14 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
               <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", textAlign: "center", lineHeight: 1.7, marginBottom: 16 }}>
                 Hvis du vil — skriv hva som er her. Ikke for å forstå det, bare for å gi det rom.
               </div>
-              <textarea className="ro-textarea" rows={4} placeholder="Det som er her akkurat nå er..." value={freeText} onChange={e => setFreeText(e.target.value)} style={{ borderColor: "rgba(106,90,154,0.3)" }} />
+              <textarea
+                className="ro-textarea"
+                rows={4}
+                placeholder="Det som er her akkurat nå er..."
+                value={freeText}
+                onChange={e => setFreeText(e.target.value)}
+                style={{ borderColor: "rgba(106,90,154,0.3)" }}
+              />
             </div>
             <button className="btn-primary" style={{ background: "#4A3A6A", marginTop: 4 }} onClick={() => setStep(3)}>
               Gå dypere →
@@ -143,7 +176,14 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
               <div className="card-sub" style={{ marginBottom: 16 }}>
                 {selected?.under || "Under overflaten — hva er egentlig der?"}
               </div>
-              <textarea className="ro-textarea" rows={4} placeholder="Under det jeg kjenner på overflaten er det kanskje..." value={deeperText} onChange={e => setDeeperText(e.target.value)} style={{ borderColor: "rgba(106,90,154,0.3)" }} />
+              <textarea
+                className="ro-textarea"
+                rows={4}
+                placeholder="Under det jeg kjenner på overflaten er det kanskje..."
+                value={deeperText}
+                onChange={e => setDeeperText(e.target.value)}
+                style={{ borderColor: "rgba(106,90,154,0.3)" }}
+              />
             </div>
             <div style={{
               background: "rgba(106,90,154,0.05)", border: "1px solid rgba(106,90,154,0.15)",
@@ -152,10 +192,10 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
             }}>
               Du trenger ikke finne svar. Det holder å ha sett etter.
             </div>
-            <button className="btn-primary" style={{ background: "#4A3A6A" }} onClick={() => setDone(true)}>
+            <button className="btn-primary" style={{ background: "#4A3A6A" }} onClick={finish}>
               Avslutt
             </button>
-            <button className="btn-ghost" style={{ display: "block", textAlign: "center", width: "100%", marginTop: 8 }} onClick={() => setDone(true)}>
+            <button className="btn-ghost" style={{ display: "block", textAlign: "center", width: "100%", marginTop: 8 }} onClick={finish}>
               Avslutt uten å skrive
             </button>
           </div>
