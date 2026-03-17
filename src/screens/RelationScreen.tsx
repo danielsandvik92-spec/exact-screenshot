@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ReflectionBubble } from "@/components/ReflectionBubble";
+import { ConfirmLeaveDialog } from "@/components/ConfirmLeaveDialog";
 import type { RelationSessionEntry } from "@/lib/types";
 
 interface RelationScreenProps {
@@ -10,6 +11,7 @@ interface RelationScreenProps {
 type Mode = "velg" | "skriv" | null;
 
 export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const [mode, setMode] = useState<Mode>(null);
   const [step, setStep] = useState(0);
   const [feeling, setFeeling] = useState("");
@@ -18,10 +20,17 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
   const [done, setDone] = useState(false);
   const [reflectionContext, setReflectionContext] = useState("");
 
-  // Strukturert modus
   const [trigger, setTrigger] = useState<string | null>(null);
   const [interpretation, setInterpretation] = useState("");
   const [alternatives, setAlternatives] = useState("");
+
+  const handleBack = () => {
+    if (mode !== null) {
+      setConfirmLeave(true);
+    } else {
+      onBack();
+    }
+  };
 
   const finishFree = async () => {
     const entry: RelationSessionEntry = {
@@ -84,15 +93,20 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
 
   return (
     <div className="fade-up">
+      {confirmLeave && (
+        <ConfirmLeaveDialog
+          onConfirm={() => { setConfirmLeave(false); onBack(); }}
+          onCancel={() => setConfirmLeave(false)}
+        />
+      )}
       <div className="module-header" style={{ background: "#2A4A6A" }}>
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button className="back-btn" onClick={handleBack}>←</button>
         <h1>Når relasjoner er vanskelige</h1>
         <p>Når noen nære gjør vondt eller skaper uro.</p>
       </div>
 
       <div style={{ padding: "16px" }}>
 
-        {/* INNGANGSVALG */}
         {mode === null && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "0 0 14px" }}>
@@ -144,17 +158,8 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
           </div>
         )}
 
-        {/* FRI SKRIVING — TRE STEG */}
         {mode === "skriv" && (
           <div className="fade-up">
-            <button
-              onClick={() => { setMode(null); setStep(0); }}
-              style={{ background: "none", border: "none", fontSize: 13, color: "hsl(var(--text-muted))", cursor: "pointer", marginBottom: 12, padding: 0 }}
-            >
-              ← Tilbake
-            </button>
-
-            {/* Stegindikator */}
             <div style={{ display: "flex", justifyContent: "center", gap: 8, padding: "4px 0 20px" }}>
               {[0, 1, 2].map(i => (
                 <div key={i} style={{
@@ -170,32 +175,14 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
             {step === 0 && (
               <div className="fade-up">
                 <div className="ro-card" style={{ margin: "0 0 14px" }}>
-                  <div style={{
-                    fontSize: 11, fontWeight: 600, letterSpacing: "1px",
-                    textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12,
-                  }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12 }}>
                     Steg 1 — Hva kjenner du?
                   </div>
-                  <div style={{
-                    fontFamily: "'Lora', serif", fontStyle: "italic",
-                    fontSize: 17, color: "#2A4A6A", lineHeight: 1.6, marginBottom: 16,
-                  }}>
+                  <div style={{ fontFamily: "'Lora', serif", fontStyle: "italic", fontSize: 17, color: "#2A4A6A", lineHeight: 1.6, marginBottom: 16 }}>
                     Stopp et øyeblikk. Hva kjenner du i kroppen og hjertet akkurat nå?
                   </div>
-                  <textarea
-                    className="ro-textarea"
-                    rows={4}
-                    placeholder="Jeg kjenner..."
-                    value={feeling}
-                    onChange={e => setFeeling(e.target.value)}
-                    style={{ marginBottom: 16 }}
-                  />
-                  <button
-                    className="btn-primary"
-                    style={{ background: "#2A4A6A", opacity: feeling.trim().length < 3 ? 0.5 : 1 }}
-                    disabled={feeling.trim().length < 3}
-                    onClick={() => setStep(1)}
-                  >
+                  <textarea className="ro-textarea" rows={4} placeholder="Jeg kjenner..." value={feeling} onChange={e => setFeeling(e.target.value)} style={{ marginBottom: 16 }} />
+                  <button className="btn-primary" style={{ background: "#2A4A6A", opacity: feeling.trim().length < 3 ? 0.5 : 1 }} disabled={feeling.trim().length < 3} onClick={() => setStep(1)}>
                     Neste →
                   </button>
                   <button className="btn-ghost" style={{ display: "block", width: "100%", textAlign: "center", marginTop: 8 }} onClick={() => setStep(1)}>
@@ -208,32 +195,14 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
             {step === 1 && (
               <div className="fade-up">
                 <div className="ro-card" style={{ margin: "0 0 14px" }}>
-                  <div style={{
-                    fontSize: 11, fontWeight: 600, letterSpacing: "1px",
-                    textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12,
-                  }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12 }}>
                     Steg 2 — Hva skjedde?
                   </div>
-                  <div style={{
-                    fontFamily: "'Lora', serif", fontStyle: "italic",
-                    fontSize: 17, color: "#2A4A6A", lineHeight: 1.6, marginBottom: 16,
-                  }}>
+                  <div style={{ fontFamily: "'Lora', serif", fontStyle: "italic", fontSize: 17, color: "#2A4A6A", lineHeight: 1.6, marginBottom: 16 }}>
                     Hva var det som skjedde? Beskriv situasjonen kort.
                   </div>
-                  <textarea
-                    className="ro-textarea"
-                    rows={4}
-                    placeholder="Det som skjedde var..."
-                    value={what}
-                    onChange={e => setWhat(e.target.value)}
-                    style={{ marginBottom: 16 }}
-                  />
-                  <button
-                    className="btn-primary"
-                    style={{ background: "#2A4A6A", opacity: what.trim().length < 3 ? 0.5 : 1 }}
-                    disabled={what.trim().length < 3}
-                    onClick={() => setStep(2)}
-                  >
+                  <textarea className="ro-textarea" rows={4} placeholder="Det som skjedde var..." value={what} onChange={e => setWhat(e.target.value)} style={{ marginBottom: 16 }} />
+                  <button className="btn-primary" style={{ background: "#2A4A6A", opacity: what.trim().length < 3 ? 0.5 : 1 }} disabled={what.trim().length < 3} onClick={() => setStep(2)}>
                     Neste →
                   </button>
                   <button className="btn-ghost" style={{ display: "block", width: "100%", textAlign: "center", marginTop: 8 }} onClick={() => setStep(2)}>
@@ -246,31 +215,14 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
             {step === 2 && (
               <div className="fade-up">
                 <div className="ro-card" style={{ margin: "0 0 14px" }}>
-                  <div style={{
-                    fontSize: 11, fontWeight: 600, letterSpacing: "1px",
-                    textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12,
-                  }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12 }}>
                     Steg 3 — Et annet perspektiv
                   </div>
-                  <div style={{
-                    fontFamily: "'Lora', serif", fontStyle: "italic",
-                    fontSize: 17, color: "#2A4A6A", lineHeight: 1.6, marginBottom: 16,
-                  }}>
+                  <div style={{ fontFamily: "'Lora', serif", fontStyle: "italic", fontSize: 17, color: "#2A4A6A", lineHeight: 1.6, marginBottom: 16 }}>
                     Er det mulig å se dette fra et annet ståsted — eller er det noe du ikke vet ennå?
                   </div>
-                  <textarea
-                    className="ro-textarea"
-                    rows={4}
-                    placeholder="Det er mulig at... / Jeg vet ikke ennå om..."
-                    value={perspective}
-                    onChange={e => setPerspective(e.target.value)}
-                    style={{ marginBottom: 16 }}
-                  />
-                  <button
-                    className="btn-primary"
-                    style={{ background: "#2A4A6A" }}
-                    onClick={finishFree}
-                  >
+                  <textarea className="ro-textarea" rows={4} placeholder="Det er mulig at... / Jeg vet ikke ennå om..." value={perspective} onChange={e => setPerspective(e.target.value)} style={{ marginBottom: 16 }} />
+                  <button className="btn-primary" style={{ background: "#2A4A6A" }} onClick={finishFree}>
                     Avslutt økten
                   </button>
                   <button className="btn-ghost" style={{ display: "block", width: "100%", textAlign: "center", marginTop: 8 }} onClick={finishFree}>
@@ -282,16 +234,8 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
           </div>
         )}
 
-        {/* STRUKTURERT FLYT */}
         {mode === "velg" && (
           <div className="fade-up">
-            <button
-              onClick={() => { setMode(null); setStep(0); }}
-              style={{ background: "none", border: "none", fontSize: 13, color: "hsl(var(--text-muted))", cursor: "pointer", marginBottom: 12, padding: 0 }}
-            >
-              ← Tilbake
-            </button>
-
             {step === 0 && (
               <div className="fade-up">
                 <div className="ro-card" style={{ margin: "0 0 14px" }}>
