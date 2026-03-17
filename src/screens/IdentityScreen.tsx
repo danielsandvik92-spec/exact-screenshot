@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { sGet, sSet } from "@/lib/storage";
 import { ReflectionBubble } from "@/components/ReflectionBubble";
+import { supabase } from "@/lib/supabase";
 
 interface IdentityScreenProps {
   onBack: () => void;
@@ -41,13 +42,24 @@ function pickQuestions(answered: string[]): { kategori: string; spørsmål: stri
   return result;
 }
 
+interface PortraitEntry {
+  id: string;
+  session_date: string;
+  questions: string[];
+  answers: string[];
+  ai_insight: string;
+}
+
 export function IdentityScreen({ onBack }: IdentityScreenProps) {
+  const [view, setView] = useState<"økt" | "portrett">("økt");
   const [step, setStep] = useState(0);
   const [questions, setQuestions] = useState<{ kategori: string; spørsmål: string }[]>([]);
   const [answers, setAnswers] = useState<string[]>(["", "", ""]);
   const [answered, setAnswered] = useState<string[]>([]);
   const [done, setDone] = useState(false);
   const [currentAnswer, setCurrentAnswer] = useState("");
+  const [portrait, setPortrait] = useState<PortraitEntry[]>([]);
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
 
   useEffect(() => {
     sGet<string[]>("id-answered-questions").then(d => {
@@ -55,7 +67,33 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
       setAnswered(prev);
       setQuestions(pickQuestions(prev));
     });
+    loadPortrait();
   }, []);
+
+  const loadPortrait = async () => {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase
+      .from("identity_portrait")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("session_date", { ascending: false });
+    if (data) setPortrait(data);
+  };
+
+  const saveToPortrait = async (insight: string) => {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("identity_portrait").insert({
+      user_id: user.id,
+      questions: questions.map(q => q.spørsmål),
+      answers,
+      ai_insight: insight,
+    });
+    await loadPortrait();
+  };
 
   const handleNext = async () => {
     const newAnswers = [...answers];
@@ -68,11 +106,6 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
     } else {
       const newAnswered = [...answered, ...questions.map(q => q.spørsmål)];
       await sSet("id-answered-questions", newAnswered);
-      await sSet("id-session-" + Date.now(), {
-        questions: questions.map(q => q.spørsmål),
-        answers: newAnswers,
-        ts: new Date().toISOString(),
-      });
       setDone(true);
     }
   };
@@ -81,6 +114,11 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
     return questions.map((q, i) =>
       `Spørsmål: "${q.spørsmål}"\nSvar: "${answers[i]}"`
     ).join("\n\n");
+  };
+
+  const handleInsightReady = (insight: string) => {
+    setAiInsight(insight);
+    saveToPortrait(insight);
   };
 
   if (questions.length === 0) return null;
@@ -93,125 +131,185 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
         <p>Ikke for å finne et svar — men for å utforske.</p>
       </div>
 
+      <div style={{ display: "flex", borderBottom: "1px solid hsl(var(--surface2))", background: "hsl(var(--background))" }}>
+        {["Ny økt", "Ditt portrett"].map((t, i) => {
+          const key = i === 0 ? "økt" : "portrett";
+          return (
+            <button key={i} onClick={() => setView(key as "økt" | "portrett")} style={{
+              flex: 1, background: "none", border: "none",
+              padding: "14px 4px", fontSize: 13,
+              fontWeight: view === key ? 600 : 400,
+              color: view === key ? "hsl(var(--green))" : "hsl(var(--text-muted))",
+              borderBottom: view === key ? "2px solid hsl(var(--green))" : "2px solid transparent",
+              cursor: "pointer", fontFamily: "'Nunito'",
+            }}>{t}</button>
+          );
+        })}
+      </div>
+
       <div style={{ padding: "16px" }}>
-        {!done ? (
-          <div className="fade-up">
-            <div style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "8px",
-              padding: "12px 0 20px",
-            }}>
-              {[0, 1, 2].map(i => (
-                <div key={i} style={{
-                  width: 8, height: 8, borderRadius: "50%",
-                  background: i === step ? "hsl(var(--green))" : i < step ? "hsl(var(--green))" : "hsl(var(--surface2))",
-                  opacity: i < step ? 0.4 : 1,
-                  transform: i === step ? "scale(1.25)" : "scale(1)",
-                  transition: "all 0.25s",
-                }} />
-              ))}
-            </div>
+        {view === "økt" && (
+          <>
+            {!done ? (
+              <div className="fade-up">
+                <div style={{ display: "flex", justifyContent: "center", gap: "8px", padding: "12px 0 20px" }}>
+                  {[0, 1, 2].map(i => (
+                    <div key={i} style={{
+                      width: 8, height: 8, borderRadius: "50%",
+                      background: i <= step ? "hsl(var(--green))" : "hsl(var(--surface2))",
+                      opacity: i < step ? 0.4 : 1,
+                      transform: i === step ? "scale(1.25)" : "scale(1)",
+                      transition: "all 0.25s",
+                    }} />
+                  ))}
+                </div>
 
-            <div className="ro-card" style={{ margin: "0 0 14px" }}>
-              <div style={{
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: "1px",
-                textTransform: "uppercase",
-                color: "hsl(var(--text-light))",
-                marginBottom: 12,
-              }}>
-                {questions[step]?.kategori === "oyeblikk" ? "Øyeblikk" :
-                 questions[step]?.kategori === "verdier" ? "Verdier" : "Fremtid"}
-              </div>
-
-              <div style={{
-                fontFamily: "'Lora', serif",
-                fontSize: 18,
-                color: "hsl(var(--green))",
-                lineHeight: 1.6,
-                marginBottom: 20,
-                fontStyle: "italic",
-              }}>
-                {questions[step]?.spørsmål}
-              </div>
-
-              <textarea
-                className="ro-textarea"
-                rows={5}
-                placeholder="Skriv fritt — det finnes ingen feil svar her..."
-                value={currentAnswer}
-                onChange={e => setCurrentAnswer(e.target.value)}
-                style={{ marginBottom: 16 }}
-              />
-
-              <button
-                className="btn-primary"
-                onClick={handleNext}
-                disabled={currentAnswer.trim().length < 3}
-                style={{ opacity: currentAnswer.trim().length < 3 ? 0.5 : 1 }}
-              >
-                {step < 2 ? "Neste spørsmål →" : "Avslutt økten"}
-              </button>
-
-              <button
-                className="btn-ghost"
-                onClick={handleNext}
-                style={{ display: "block", width: "100%", textAlign: "center", marginTop: 8 }}
-              >
-                Hopp over dette spørsmålet
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="fade-up">
-            <div className="ro-card" style={{ margin: "0 0 14px" }}>
-              <div className="card-title">Økten er fullført</div>
-              <div className="card-sub" style={{ marginBottom: 16 }}>
-                Du tok deg tid til å kjenne etter hvem du er. Det er ikke lite.
-              </div>
-
-              {questions.map((q, i) => (
-                <div key={i} style={{
-                  marginBottom: 16,
-                  paddingBottom: 16,
-                  borderBottom: i < 2 ? "1px solid hsl(var(--surface2))" : "none",
-                }}>
+                <div className="ro-card" style={{ margin: "0 0 14px" }}>
                   <div style={{
-                    fontFamily: "'Lora', serif",
-                    fontStyle: "italic",
-                    fontSize: 13,
-                    color: "hsl(var(--text-muted))",
-                    marginBottom: 6,
+                    fontSize: 11, fontWeight: 600, letterSpacing: "1px",
+                    textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12,
                   }}>
-                    {q.spørsmål}
+                    {questions[step]?.kategori === "oyeblikk" ? "Øyeblikk" :
+                     questions[step]?.kategori === "verdier" ? "Verdier" : "Fremtid"}
                   </div>
+
                   <div style={{
-                    fontSize: 14,
-                    color: "hsl(var(--text))",
-                    lineHeight: 1.7,
+                    fontFamily: "'Lora', serif", fontSize: 18,
+                    color: "hsl(var(--green))", lineHeight: 1.6,
+                    marginBottom: 20, fontStyle: "italic",
                   }}>
-                    {answers[i] || <span style={{ color: "hsl(var(--text-light))", fontStyle: "italic" }}>Hoppet over</span>}
+                    {questions[step]?.spørsmål}
+                  </div>
+
+                  <textarea
+                    className="ro-textarea"
+                    rows={5}
+                    placeholder="Skriv fritt — det finnes ingen feil svar her..."
+                    value={currentAnswer}
+                    onChange={e => setCurrentAnswer(e.target.value)}
+                    style={{ marginBottom: 16 }}
+                  />
+
+                  <button
+                    className="btn-primary"
+                    onClick={handleNext}
+                    disabled={currentAnswer.trim().length < 3}
+                    style={{ opacity: currentAnswer.trim().length < 3 ? 0.5 : 1 }}
+                  >
+                    {step < 2 ? "Neste spørsmål →" : "Avslutt økten"}
+                  </button>
+
+                  <button
+                    className="btn-ghost"
+                    onClick={handleNext}
+                    style={{ display: "block", width: "100%", textAlign: "center", marginTop: 8 }}
+                  >
+                    Hopp over dette spørsmålet
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="fade-up">
+                <div className="ro-card" style={{ margin: "0 0 14px" }}>
+                  <div className="card-title">Økten er fullført</div>
+                  <div className="card-sub" style={{ marginBottom: 16 }}>
+                    Du tok deg tid til å kjenne etter hvem du er. Det er ikke lite.
+                  </div>
+
+                  {questions.map((q, i) => (
+                    <div key={i} style={{
+                      marginBottom: 16, paddingBottom: 16,
+                      borderBottom: i < 2 ? "1px solid hsl(var(--surface2))" : "none",
+                    }}>
+                      <div style={{
+                        fontFamily: "'Lora', serif", fontStyle: "italic",
+                        fontSize: 13, color: "hsl(var(--text-muted))", marginBottom: 6,
+                      }}>
+                        {q.spørsmål}
+                      </div>
+                      <div style={{ fontSize: 14, color: "hsl(var(--text))", lineHeight: 1.7 }}>
+                        {answers[i] || <span style={{ color: "hsl(var(--text-light))", fontStyle: "italic" }}>Hoppet over</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <ReflectionBubble
+                  context={getContext()}
+                  systemPrompt="Du er en varm, nysgjerrig samtalepartner. Brukeren har nettopp svart på tre spørsmål om hvem de er. Les svarene deres nøye. Reflekter tilbake ett eller to mønstre du legger merke til — ikke analyser, men si hva du hører. Still gjerne ett enkelt oppfølgingsspørsmål til slutt. Skriv på norsk, 3-5 setninger."
+                  color="green"
+                  autoFetch={true}
+                  onInsightReady={handleInsightReady}
+                />
+
+                <button
+                  className="btn-secondary"
+                  style={{ marginTop: 14, width: "100%" }}
+                  onClick={onBack}
+                >
+                  Tilbake til hjem
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {view === "portrett" && (
+          <div className="fade-up">
+            {portrait.length === 0 ? (
+              <div className="ro-card">
+                <div className="card-title">Portrettet ditt er tomt ennå</div>
+                <div className="card-sub">
+                  Fullfør en økt så begynner portrettet ditt å ta form. Over tid vil du se mønstre i hvem du er.
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="ro-card" style={{ margin: "0 0 14px", background: "rgba(58,90,42,0.05)", border: "1px solid rgba(58,90,42,0.15)" }}>
+                  <div className="card-title">Ditt portrett</div>
+                  <div className="card-sub">
+                    Dette er hva du har oppdaget om deg selv over tid — med dine egne ord.
                   </div>
                 </div>
-              ))}
-            </div>
 
-            <ReflectionBubble
-              context={getContext()}
-              systemPrompt="Du er en varm, nysgjerrig samtalepartner. Brukeren har nettopp svart på tre spørsmål om hvem de er. Les svarene deres nøye. Reflekter tilbake ett eller to mønstre du legger merke til — ikke analyser, men si hva du hører. Still gjerne ett enkelt oppfølgingsspørsmål til slutt. Skriv på norsk, 3-5 setninger."
-              color="green"
-              autoFetch={true}
-            />
+                {portrait.map((entry, i) => (
+                  <div key={entry.id} className="ro-card" style={{ margin: "0 0 14px" }}>
+                    <div style={{
+                      fontSize: 11, fontWeight: 600, letterSpacing: "1px",
+                      textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12,
+                    }}>
+                      {new Date(entry.session_date).toLocaleDateString("nb-NO", {
+                        day: "numeric", month: "long", year: "numeric"
+                      })}
+                    </div>
 
-            <button
-              className="btn-secondary"
-              style={{ marginTop: 14, width: "100%" }}
-              onClick={onBack}
-            >
-              Tilbake til hjem
-            </button>
+                    {entry.ai_insight && (
+                      <div style={{
+                        fontFamily: "'Lora', serif", fontStyle: "italic",
+                        fontSize: 14, color: "hsl(var(--green))",
+                        lineHeight: 1.7, marginBottom: 12,
+                        paddingLeft: 12, borderLeft: "3px solid hsl(var(--green))",
+                      }}>
+                        {entry.ai_insight}
+                      </div>
+                    )}
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {entry.questions?.map((q: string, j: number) => (
+                        <div key={j} style={{ fontSize: 12, color: "hsl(var(--text-muted))" }}>
+                          <span style={{ fontStyle: "italic" }}>{q}</span>
+                          {entry.answers?.[j] && (
+                            <div style={{ fontSize: 13, color: "hsl(var(--text))", marginTop: 2 }}>
+                              {entry.answers[j]}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         )}
       </div>

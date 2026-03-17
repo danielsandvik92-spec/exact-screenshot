@@ -8,6 +8,7 @@ interface ReflectionBubbleProps {
   systemPrompt?: string;
   color?: "green" | "terra" | "purple";
   autoFetch?: boolean;
+  onInsightReady?: (insight: string) => void;
 }
 
 const COLOR_MAP = {
@@ -21,6 +22,7 @@ export function ReflectionBubble({
   systemPrompt,
   color = "green",
   autoFetch = true,
+  onInsightReady,
 }: ReflectionBubbleProps) {
   const navigate = useNavigate();
   const [text, setText] = useState<string | null>(null);
@@ -38,6 +40,9 @@ export function ReflectionBubble({
     const result = await getReflection(context, systemPrompt);
     setText(result);
     setLoading(false);
+    if (result && onInsightReady) {
+      onInsightReady(result);
+    }
   };
 
   useEffect(() => {
