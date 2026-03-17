@@ -68,7 +68,7 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
           <ReflectionBubble
             context={reflectionContext}
             systemPrompt="Du er en varm, rolig venn. Brukeren har nettopp grublet over en sosial situasjon og prøvd å se den tydeligere. Ikke analyser det de har skrevet — bare anerkjenn at de tok seg tid, og si noe rolig og avdramatiserende om at hjernen gjør dette fordi den bryr seg, ikke fordi noe gikk galt. Skriv på norsk, 2-3 setninger. Ikke bruk fagord."
-            color="mauve"
+            color="terra"
             autoFetch={true}
           />
           <button className="btn-primary" style={{ marginTop: 14 }} onClick={onBack}>Gå tilbake</button>
@@ -187,7 +187,7 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
                 selected={category}
                 onSelect={setCategory}
                 storageKey="social-cats"
-                color="mauve"
+                color="terra"
               />
             </div>
             {category && (
