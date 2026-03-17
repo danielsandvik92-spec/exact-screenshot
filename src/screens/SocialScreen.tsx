@@ -54,14 +54,9 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
           <p>For når hodet ikke vil la det gå.</p>
         </div>
         <div style={{ padding: "16px" }}>
-          <div className="ro-card" style={{ margin: "0 0 14px" }}>
-            <div className="reframe-box">
-              Du tok deg tid til å stoppe opp og se det tydeligere. Det er ikke lite. 🌿
-            </div>
-          </div>
           <ReflectionBubble
             context={reflectionContext}
-            systemPrompt="Du er en varm, rolig venn. Brukeren har nettopp grublet over en sosial situasjon og prøvd å se den tydeligere. Ikke analyser det de har skrevet — bare anerkjenn at de tok seg tid, og si noe rolig og avdramatiserende om at hjernen gjør dette fordi den bryr seg, ikke fordi noe gikk galt. Skriv på norsk, 2-3 setninger. Ikke bruk fagord."
+            systemPrompt="Du er en varm, rolig støtteperson. Brukeren har nettopp brukt tid på å se en sosial situasjon tydeligere. Les hva de har delt og anerkjenn det de sitter med — ikke analyser, ikke forklar, bare vær til stede med dem. Skriv på norsk, 2-3 setninger."
             color="terra"
             autoFetch={true}
           />
