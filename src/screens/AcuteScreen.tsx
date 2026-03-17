@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ACUTE } from "@/lib/data";
 import { ChipSelector } from "@/components/ChipSelector";
 import { ReflectionBubble } from "@/components/ReflectionBubble";
+import { ConfirmLeaveDialog } from "@/components/ConfirmLeaveDialog";
 import type { AcuteSessionEntry } from "@/lib/types";
 
 interface AcuteScreenProps {
@@ -11,21 +12,16 @@ interface AcuteScreenProps {
 }
 
 const BREATH_DURATIONS: Record<string, number> = {
-  inn1: 3,
-  inn2: 1,
-  ut: 7,
-  pause: 1,
+  inn1: 3, inn2: 1, ut: 7, pause: 1,
 };
 
 const BREATH_NEXT: Record<string, string> = {
-  inn1: "inn2",
-  inn2: "ut",
-  ut: "pause",
-  pause: "inn1",
+  inn1: "inn2", inn2: "ut", ut: "pause", pause: "inn1",
 };
 
 export function AcuteScreen({ onBack, addSession, onEmotion }: AcuteScreenProps) {
   const [step, setStep] = useState(0);
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const [chosen, setChosen] = useState<string | null>(null);
   const [breathStep, setBreathStep] = useState("inn1");
   const [intensityBefore, setIntensityBefore] = useState<number | null>(null);
@@ -38,26 +34,28 @@ export function AcuteScreen({ onBack, addSession, onEmotion }: AcuteScreenProps)
   const [done, setDone] = useState(false);
   const [reflectionContext, setReflectionContext] = useState("");
 
-  // Single unified breathing effect — avoids race condition between two competing effects
+  const handleBack = () => {
+    if (step > 0) {
+      setConfirmLeave(true);
+    } else {
+      onBack();
+    }
+  };
+
   useEffect(() => {
     if (step !== 1) return;
-
-    // Set timer for current breath step on entry
     setTimer(BREATH_DURATIONS[breathStep]);
-
     const iv = setInterval(() => {
       setTimer(t => {
         if (t <= 1) {
           const nextStep = BREATH_NEXT[breathStep];
           setBreathCount(c => c + 1);
           setBreathStep(nextStep);
-          // Return the duration of the NEXT step immediately so we never hit 0
           return BREATH_DURATIONS[nextStep];
         }
         return t - 1;
       });
     }, 1000);
-
     return () => clearInterval(iv);
   }, [step, breathStep]);
 
@@ -97,7 +95,7 @@ export function AcuteScreen({ onBack, addSession, onEmotion }: AcuteScreenProps)
           </div>
           <ReflectionBubble
             context={reflectionContext}
-            systemPrompt="Du er en varm, rolig støtteperson. Brukeren har nettopp gjennomført en akutt reguleringssesjon. De brukte pust og grounding for å roe nervesystemet. Valider det de har gjort — ikke analyser, bare anerkjenn at de tok vare på seg selv. Skriv på norsk, 2-3 setninger."
+            systemPrompt="Du er en varm, rolig støtteperson. Brukeren har nettopp gjennomført en akutt reguleringssesjon. De brukte pust og grounding for å roe nervesystemet. Ikke ros dem, ikke analyser — si noe sant og varmt om det de gjorde for seg selv. Skriv på norsk, 2-3 setninger."
             color="green"
             autoFetch={true}
           />
@@ -126,8 +124,14 @@ export function AcuteScreen({ onBack, addSession, onEmotion }: AcuteScreenProps)
 
   return (
     <div className="fade-up">
+      {confirmLeave && (
+        <ConfirmLeaveDialog
+          onConfirm={() => { setConfirmLeave(false); onBack(); }}
+          onCancel={() => setConfirmLeave(false)}
+        />
+      )}
       <div className="module-header" style={{ background: "hsl(var(--green))" }}>
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button className="back-btn" onClick={handleBack}>←</button>
         <h1>Akutt regulering</h1>
         <p>Reguler kroppen før du analyserer situasjonen.</p>
       </div>
