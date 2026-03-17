@@ -14,20 +14,22 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
   const [step, setStep] = useState(0);
 
   const [freeText, setFreeText] = useState("");
+  const [friendView, setFriendView] = useState("");
+  const [needToHear, setNeedToHear] = useState("");
   const [category, setCategory] = useState<string | null>(null);
   const [fear, setFear] = useState("");
   const [evidence, setEvidence] = useState("");
-  const [friendView, setFriendView] = useState("");
+  const [guidedFriendView, setGuidedFriendView] = useState("");
   const [reframe, setReframe] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [reflectionContext, setReflectionContext] = useState("");
 
-  const totalSteps = mode === "free" ? 2 : 3;
+  const totalSteps = 3;
 
   const finish = async () => {
     const context = mode === "free"
-      ? `Brukeren skrev fritt etter en sosial situasjon: "${freeText}". Valgt reframe: "${reframe || "ingen"}".`
-      : `Brukeren hadde kategori: "${category}". Frykt: "${fear}". Bevis: "${evidence}". Venneperspektiv: "${friendView}". Valgt reframe: "${reframe || "ingen"}".`;
+      ? `Brukeren skrev fritt etter en sosial situasjon. Det som ikke slapp: "${freeText}". Venneperspektiv: "${friendView}". Det de trenger å høre: "${needToHear}". Valgt reframe: "${reframe || "ingen"}".`
+      : `Brukeren hadde kategori: "${category}". Frykt: "${fear}". Bevis: "${evidence}". Venneperspektiv: "${guidedFriendView}". Valgt reframe: "${reframe || "ingen"}".`;
 
     setReflectionContext(context);
 
@@ -37,7 +39,7 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
       fear,
       evidence,
       neutral: "",
-      friendView,
+      friendView: mode === "free" ? friendView : guidedFriendView,
       reframe: reframe || "",
       ts: new Date().toISOString()
     };
@@ -83,6 +85,7 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
           </div>
         )}
 
+        {/* ── Velg inngang ─────────────────────────────────────── */}
         {mode === "choose" && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
@@ -112,17 +115,18 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
           </div>
         )}
 
+        {/* ── FRI SKRIVING ─────────────────────────────────────── */}
         {mode === "free" && step === 0 && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
-              <div className="card-title">Hva spinner i hodet ditt?</div>
+              <div className="card-title">Hva er det som ikke slipper deg?</div>
               <div className="card-sub">
-                Ikke tenk på hvordan du formulerer det. Bare skriv.
+                Ikke tenk på hvordan du formulerer det. Bare skriv det ut.
               </div>
               <textarea
                 className="ro-textarea"
                 rows={6}
-                placeholder="Det som skjedde var..."
+                placeholder="Det som spinner er..."
                 value={freeText}
                 onChange={e => setFreeText(e.target.value)}
               />
@@ -141,20 +145,58 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
         {mode === "free" && step === 1 && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
-              <div className="card-title">Velg en setning å bære med deg</div>
-              <div className="card-sub">Eller avslutt uten — det er også helt greit.</div>
-              <div style={{ marginTop: 12 }}>
-                {REFRAMES_SOCIAL.map((r, i) => (
-                  <div
-                    key={i}
-                    className={`ro-chip ${reframe === r ? "selected" : ""}`}
-                    style={{ display: "block", marginBottom: 8, padding: "14px 16px" }}
-                    onClick={() => setReframe(reframe === r ? null : r)}
-                  >
-                    "{r}"
-                  </div>
-                ))}
+              <div className="card-title">Hvis en venn fortalte deg dette...</div>
+              <div className="card-sub">
+                Akkurat det du nettopp skrev — hva ville du tenkt om dem? Hva ville du sagt?
               </div>
+              <textarea
+                className="ro-textarea"
+                rows={5}
+                placeholder="Jeg ville tenkt at hun/han..."
+                value={friendView}
+                onChange={e => setFriendView(e.target.value)}
+              />
+            </div>
+            <div className="reframe-box">
+              Du er mye snillere mot andre enn mot deg selv. Det du nettopp svarte — gjelder det ikke deg også?
+            </div>
+            {friendView.length > 5 && (
+              <button className="btn-primary" style={{ marginTop: 12 }} onClick={() => setStep(2)}>
+                Videre →
+              </button>
+            )}
+          </div>
+        )}
+
+        {mode === "free" && step === 2 && (
+          <div className="fade-up">
+            <div className="ro-card" style={{ margin: "16px 0 0" }}>
+              <div className="card-title">Hva trenger du å høre nå?</div>
+              <div className="card-sub">
+                Ikke hva som er sant eller logisk — bare hva som ville gjort dette litt lettere å bære.
+              </div>
+              <textarea
+                className="ro-textarea"
+                rows={4}
+                placeholder="Det jeg trenger å høre er..."
+                value={needToHear}
+                onChange={e => setNeedToHear(e.target.value)}
+              />
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <div className="card-sub" style={{ padding: "0 4px", marginBottom: 8 }}>
+                Eller velg en setning å bære med deg:
+              </div>
+              {REFRAMES_SOCIAL.map((r, i) => (
+                <div
+                  key={i}
+                  className={`ro-chip ${reframe === r ? "selected" : ""}`}
+                  style={{ display: "block", marginBottom: 8, padding: "14px 16px" }}
+                  onClick={() => setReframe(reframe === r ? null : r)}
+                >
+                  "{r}"
+                </div>
+              ))}
             </div>
             <button className="btn-primary" style={{ marginTop: 14 }} onClick={finish}>
               Avslutt
@@ -162,6 +204,7 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
           </div>
         )}
 
+        {/* ── GUIDED ───────────────────────────────────────────── */}
         {mode === "guided" && step === 0 && (
           <div className="fade-up">
             <div className="ro-card" style={{ margin: "16px 0 0" }}>
@@ -226,8 +269,8 @@ export function SocialScreen({ onBack, addSession }: SocialScreenProps) {
                   className="ro-textarea"
                   rows={2}
                   placeholder="Jeg ville tenkt at hun/han..."
-                  value={friendView}
-                  onChange={e => setFriendView(e.target.value)}
+                  value={guidedFriendView}
+                  onChange={e => setGuidedFriendView(e.target.value)}
                 />
               </div>
             </div>
