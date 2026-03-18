@@ -163,184 +163,179 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
       <div style={{ padding: "16px 16px 0" }}>
 
         {tab === 0 && (
-          <div className="fade-up">
+  <div className="fade-up">
 
-            <div className="ro-card" style={{ margin: "0 0 14px" }}>
-              <div className="card-title" style={{ marginBottom: 8 }}>Velg uke</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {availableWeeks.length === 0 ? (
-                  <div style={{ fontSize: 12, color: "hsl(var(--text-light))", fontStyle: "italic" }}>
-                    Ingen data ennå. Gjør din første innsjekk på forsiden.
-                  </div>
-                ) : availableWeeks.map((ws, i) => (
-                  <div key={i} onClick={() => setSelectedWeek(ws)} style={{
-                    padding: "7px 14px", borderRadius: 20, fontSize: 12, cursor: "pointer",
-                    border: `1.5px solid ${activeWeek.toISOString() === ws.toISOString() ? "hsl(var(--green))" : "hsl(var(--surface2))"}`,
-                    background: activeWeek.toISOString() === ws.toISOString() ? "hsla(var(--green) / 0.08)" : "hsl(var(--surface))",
-                    color: activeWeek.toISOString() === ws.toISOString() ? "hsl(var(--green))" : "hsl(var(--text-muted))",
-                    fontWeight: activeWeek.toISOString() === ws.toISOString() ? 600 : 400,
-                  }}>
-                    {getWeekLabel(ws)}{i === 0 ? " (siste)" : ""}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="ro-card" style={{ margin: "0 0 14px" }}>
-  <div className="card-title">Uke {getWeekLabel(activeWeek)}</div>
-  {weekCheckins.length === 0 ? (
-    <div className="card-sub">Ingen innsjekker registrert denne uken.</div>
-  ) : (
-    <div style={{ fontFamily: "'Lora', serif", fontStyle: "italic", fontSize: 14, color: "hsl(var(--text))", lineHeight: 1.8, marginTop: 8 }}>
-      {weekCheckins.length === 1
-        ? "Du tok deg tid til å sjekke inn denne uken. Det betyr noe."
-        : `Du tok deg tid til å sjekke inn ${weekCheckins.length} ganger denne uken.`}
-      {topMoodMeta && (() => {
-        const label = topMoodMeta.label.toLowerCase();
-        if (label === "god" || label === "rolig") return ` Du har stort sett hatt det ${label} ${topMoodMeta.emoji}`;
-        if (label === "nøytral") return ` Stemningen din har vært i balanse denne uken ${topMoodMeta.emoji}`;
-        if (label === "tung") return ` Det har vært litt tungt denne uken ${topMoodMeta.emoji} — det er lov.`;
-        if (label === "numb") return ` Det virker som du har kjent deg litt nummen denne uken ${topMoodMeta.emoji}`;
-        return ` Vanligste stemning var ${topMoodMeta.emoji} ${topMoodMeta.label}.`;
-      })()}
-      {avgEnergy && (() => {
-        const e = parseFloat(avgEnergy);
-        if (e >= 7) return " Kroppen din har hatt god energi og ro.";
-        if (e >= 4) return " Kroppen din har vært i noenlunde balanse.";
-        return " Det virker som kroppen din har hatt det litt tungt denne uken.";
-      })()}
-      {weekAcute.length > 0 && ` Du brukte akutt-modulen ${weekAcute.length > 1 ? `${weekAcute.length} ganger` : "én gang"} — bra at du tok vare på deg selv.`}
-      {weekSocial.length > 0 && ` Du bearbeidet ${weekSocial.length > 1 ? `${weekSocial.length} sosiale situasjoner` : "en sosial situasjon"} denne uken.`}
-      {weekCritic.length > 0 && ` Du møtte den indre kritikeren ${weekCritic.length > 1 ? `${weekCritic.length} ganger` : "én gang"} — det krever mot.`}
-      {weekEvenings.length > 0 && ` Du tok deg tid til ${weekEvenings.length > 1 ? `${weekEvenings.length} kveldsstunder` : "en kveldsstund"} med deg selv.`}
+    <div className="ro-card" style={{ margin: "0 0 14px" }}>
+      <div className="card-title" style={{ marginBottom: 8 }}>Velg uke</div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {availableWeeks.length === 0 ? (
+          <div style={{ fontSize: 12, color: "hsl(var(--text-light))", fontStyle: "italic" }}>
+            Ingen data ennå. Gjør din første innsjekk på forsiden.
+          </div>
+        ) : availableWeeks.map((ws, i) => (
+          <div key={i} onClick={() => setSelectedWeek(ws)} style={{
+            padding: "7px 14px", borderRadius: 20, fontSize: 12, cursor: "pointer",
+            border: `1.5px solid ${activeWeek.toISOString() === ws.toISOString() ? "hsl(var(--green))" : "hsl(var(--surface2))"}`,
+            background: activeWeek.toISOString() === ws.toISOString() ? "hsla(var(--green) / 0.08)" : "hsl(var(--surface))",
+            color: activeWeek.toISOString() === ws.toISOString() ? "hsl(var(--green))" : "hsl(var(--text-muted))",
+            fontWeight: activeWeek.toISOString() === ws.toISOString() ? 600 : 400,
+          }}>
+            {getWeekLabel(ws)}{i === 0 ? " (siste)" : ""}
+          </div>
+        ))}
+      </div>
     </div>
-  )}
-  {weekCheckins.length > 0 && (
-    <div style={{ marginTop: 14 }}>
-      <CheckinGraph checkins={weekCheckins} />
+
+    <div className="ro-card" style={{ margin: "0 0 14px" }}>
+      <div className="card-title">Uke {getWeekLabel(activeWeek)}</div>
+      {weekCheckins.length === 0 ? (
+        <div className="card-sub">Ingen innsjekker registrert denne uken.</div>
+      ) : (
+        <div style={{ fontFamily: "'Lora', serif", fontStyle: "italic", fontSize: 14, color: "hsl(var(--text))", lineHeight: 1.8, marginTop: 8 }}>
+          {weekCheckins.length === 1
+            ? "Du tok deg tid til å sjekke inn denne uken. Det betyr noe."
+            : `Du tok deg tid til å sjekke inn ${weekCheckins.length} ganger denne uken.`}
+          {topMoodMeta && (() => {
+            const label = topMoodMeta.label.toLowerCase();
+            if (label === "god" || label === "rolig") return ` Du har stort sett hatt det ${label} ${topMoodMeta.emoji}`;
+            if (label === "nøytral") return ` Stemningen din har vært i balanse denne uken ${topMoodMeta.emoji}`;
+            if (label === "tung") return ` Det har vært litt tungt denne uken ${topMoodMeta.emoji} — det er lov.`;
+            if (label === "numb") return ` Det virker som du har kjent deg litt nummen denne uken ${topMoodMeta.emoji}`;
+            return ` Vanligste stemning var ${topMoodMeta.emoji} ${topMoodMeta.label}.`;
+          })()}
+          {avgEnergy && (() => {
+            const e = parseFloat(avgEnergy);
+            if (e >= 7) return " Kroppen din har hatt god energi og ro.";
+            if (e >= 4) return " Kroppen din har vært i noenlunde balanse.";
+            return " Det virker som kroppen din har hatt det litt tungt denne uken.";
+          })()}
+          {weekAcute.length > 0 && ` Du brukte akutt-modulen ${weekAcute.length > 1 ? `${weekAcute.length} ganger` : "én gang"} — bra at du tok vare på deg selv.`}
+          {weekSocial.length > 0 && ` Du bearbeidet ${weekSocial.length > 1 ? `${weekSocial.length} sosiale situasjoner` : "en sosial situasjon"} denne uken.`}
+          {weekCritic.length > 0 && ` Du møtte den indre kritikeren ${weekCritic.length > 1 ? `${weekCritic.length} ganger` : "én gang"} — det krever mot.`}
+          {weekEvenings.length > 0 && ` Du tok deg tid til ${weekEvenings.length > 1 ? `${weekEvenings.length} kveldsstunder` : "en kveldsstund"} med deg selv.`}
+        </div>
+      )}
+      {weekCheckins.length > 0 && (
+        <div style={{ marginTop: 14 }}>
+          <CheckinGraph checkins={weekCheckins} />
+        </div>
+      )}
     </div>
-  )}
-</div>
-              {weekCheckins.length > 0 && (
-                <div style={{ marginTop: 14 }}>
-                  <CheckinGraph checkins={weekCheckins} />
-                </div>
-              )}
+
+    {(topCriticVoice || topModule?.count > 0) && (
+      <div className="ro-card" style={{ margin: "0 0 14px" }}>
+        <div className="card-title">Det du kommer tilbake til</div>
+        <div className="card-sub" style={{ marginBottom: 14 }}>
+          Mønstre over all tid — ikke for å analysere, men for å kjenne igjen.
+        </div>
+        {topModule?.count > 0 && (
+          <div style={{ marginBottom: 12, padding: "12px 14px", background: "hsl(var(--surface))", borderRadius: "var(--radius-sm)" }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--text-light))", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.8px" }}>Modul du bruker oftest</div>
+            <div style={{ fontSize: 14, color: "hsl(var(--text))", fontFamily: "'Lora', serif", fontStyle: "italic" }}>
+              {topModule.label}
             </div>
+          </div>
+        )}
+        {topCriticVoice && (
+          <div style={{ padding: "12px 14px", background: "hsl(var(--surface))", borderRadius: "var(--radius-sm)" }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--text-light))", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.8px" }}>Stemmen du oftest kjenner igjen</div>
+            <div style={{ fontSize: 14, color: "hsl(var(--text))", fontFamily: "'Lora', serif", fontStyle: "italic" }}>
+              {topCriticVoice[0]}
+            </div>
+          </div>
+        )}
+      </div>
+    )}
 
-            {(topCriticVoice || topModule?.count > 0) && (
-              <div className="ro-card" style={{ margin: "0 0 14px" }}>
-                <div className="card-title">Det du kommer tilbake til</div>
-                <div className="card-sub" style={{ marginBottom: 14 }}>
-                  Mønstre over all tid — ikke for å analysere, men for å kjenne igjen.
-                </div>
-                {topModule?.count > 0 && (
-                  <div style={{ marginBottom: 12, padding: "12px 14px", background: "hsl(var(--surface))", borderRadius: "var(--radius-sm)" }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--text-light))", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.8px" }}>Modul du bruker oftest</div>
-                    <div style={{ fontSize: 14, color: "hsl(var(--text))", fontFamily: "'Lora', serif", fontStyle: "italic" }}>
-                      {topModule.label}
-                    </div>
-                  </div>
-                )}
-                {topCriticVoice && (
-                  <div style={{ padding: "12px 14px", background: "hsl(var(--surface))", borderRadius: "var(--radius-sm)" }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--text-light))", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.8px" }}>Stemmen du oftest kjenner igjen</div>
-                    <div style={{ fontSize: 14, color: "hsl(var(--text))", fontFamily: "'Lora', serif", fontStyle: "italic" }}>
-                      {topCriticVoice[0]}
-                    </div>
-                  </div>
-                )}
+    {(Object.keys(criticCounts).length > 0 || Object.keys(socialCounts).length > 0) && (
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+        {Object.keys(criticCounts).length > 0 && (
+          <div className="ro-card" style={{ margin: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>🔥 Kritiker</div>
+            {Object.entries(criticCounts).sort((a, b) => b[1] - a[1]).map(([v, c], i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 5 }}>
+                <span style={{ color: "hsl(var(--text-muted))" }}>{v}</span>
+                <span style={{ fontWeight: 600, color: "hsl(var(--terra))" }}>{c}x</span>
               </div>
-            )}
-
-            {(Object.keys(criticCounts).length > 0 || Object.keys(socialCounts).length > 0) && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-                {Object.keys(criticCounts).length > 0 && (
-                  <div className="ro-card" style={{ margin: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>🔥 Kritiker</div>
-                    {Object.entries(criticCounts).sort((a, b) => b[1] - a[1]).map(([v, c], i) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 5 }}>
-                        <span style={{ color: "hsl(var(--text-muted))" }}>{v}</span>
-                        <span style={{ fontWeight: 600, color: "hsl(var(--terra))" }}>{c}x</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {Object.keys(socialCounts).length > 0 && (
-                  <div className="ro-card" style={{ margin: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>👥 Sosialt</div>
-                    {Object.entries(socialCounts).sort((a, b) => b[1] - a[1]).map(([v, c], i) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 5 }}>
-                        <span style={{ color: "hsl(var(--text-muted))" }}>{v}</span>
-                        <span style={{ fontWeight: 600, color: "hsl(var(--terra))" }}>{c}x</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+            ))}
+          </div>
+        )}
+        {Object.keys(socialCounts).length > 0 && (
+          <div className="ro-card" style={{ margin: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>👥 Sosialt</div>
+            {Object.entries(socialCounts).sort((a, b) => b[1] - a[1]).map(([v, c], i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 5 }}>
+                <span style={{ color: "hsl(var(--text-muted))" }}>{v}</span>
+                <span style={{ fontWeight: 600, color: "hsl(var(--terra))" }}>{c}x</span>
               </div>
-            )}
+            ))}
+          </div>
+        )}
+      </div>
+    )}
 
-            {Object.keys(acuteCounts).length > 0 && (
-              <div className="ro-card" style={{ margin: "0 0 14px" }}>
-                <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 10 }}>🌀 Akutte triggere</div>
-                {Object.entries(acuteCounts).sort((a, b) => b[1] - a[1]).map(([symptom, count], i) => (
-                  <div key={i} style={{ marginBottom: 10 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
-                      <span style={{ color: "hsl(var(--text-muted))" }}>{symptom}</span>
-                      <span style={{ color: "hsl(var(--text-light))" }}>{count}x</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: `${Math.min(100, (count / Math.max(...Object.values(acuteCounts))) * 100)}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+    {Object.keys(acuteCounts).length > 0 && (
+      <div className="ro-card" style={{ margin: "0 0 14px" }}>
+        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 10 }}>🌀 Akutte triggere</div>
+        {Object.entries(acuteCounts).sort((a, b) => b[1] - a[1]).map(([symptom, count], i) => (
+          <div key={i} style={{ marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+              <span style={{ color: "hsl(var(--text-muted))" }}>{symptom}</span>
+              <span style={{ color: "hsl(var(--text-light))" }}>{count}x</span>
+            </div>
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: `${Math.min(100, (count / Math.max(...Object.values(acuteCounts))) * 100)}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
 
-            {weekEvenings.length > 0 && (
-              <div className="ro-card" style={{ margin: "0 0 14px" }}>
-                <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 10 }}>🌙 Kveldstanker</div>
-                {weekEvenings.map((e, i) => (
-                  <div key={i} style={{
-                    paddingBottom: i < weekEvenings.length - 1 ? 12 : 0,
-                    marginBottom: i < weekEvenings.length - 1 ? 12 : 0,
-                    borderBottom: i < weekEvenings.length - 1 ? "1px solid hsl(var(--surface2))" : "none",
-                  }}>
-                    <div style={{ fontSize: 10, color: "hsl(var(--text-light))", marginBottom: 6, fontWeight: 500 }}>{e.date}</div>
-                    {e.q4 && (
-                      <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", lineHeight: 1.6 }}>
-                        <span style={{ fontWeight: 600, color: "hsl(var(--green))" }}>Energi/ro: </span>{e.q4}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {checkins.length > 0 && (
-              <div className="ro-card" style={{ margin: "0 0 14px" }}>
-                <div className="card-title">Humørfordeling totalt</div>
-                <div style={{ marginTop: 10 }}>
-                  {MOOD_META.map(m => {
-                    const count = allTimeMoodCounts[m.label] || 0;
-                    const pct = checkins.length > 0 ? Math.round((count / checkins.length) * 100) : 0;
-                    return (
-                      <div key={m.label} style={{ marginBottom: 10 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
-                          <span style={{ color: "hsl(var(--text-muted))" }}>{m.emoji} {m.label}</span>
-                          <span style={{ color: "hsl(var(--text-light))" }}>{count}x</span>
-                        </div>
-                        <div className="progress-bar">
-                          <div className="progress-fill" style={{ width: `${pct}%`, background: m.color }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+    {weekEvenings.length > 0 && (
+      <div className="ro-card" style={{ margin: "0 0 14px" }}>
+        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 10 }}>🌙 Kveldstanker</div>
+        {weekEvenings.map((e, i) => (
+          <div key={i} style={{
+            paddingBottom: i < weekEvenings.length - 1 ? 12 : 0,
+            marginBottom: i < weekEvenings.length - 1 ? 12 : 0,
+            borderBottom: i < weekEvenings.length - 1 ? "1px solid hsl(var(--surface2))" : "none",
+          }}>
+            <div style={{ fontSize: 10, color: "hsl(var(--text-light))", marginBottom: 6, fontWeight: 500 }}>{e.date}</div>
+            {e.q4 && (
+              <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", lineHeight: 1.6 }}>
+                <span style={{ fontWeight: 600, color: "hsl(var(--green))" }}>Energi/ro: </span>{e.q4}
               </div>
             )}
           </div>
-        )}
+        ))}
+      </div>
+    )}
+
+    {checkins.length > 0 && (
+      <div className="ro-card" style={{ margin: "0 0 14px" }}>
+        <div className="card-title">Humørfordeling totalt</div>
+        <div style={{ marginTop: 10 }}>
+          {MOOD_META.map(m => {
+            const count = allTimeMoodCounts[m.label] || 0;
+            const pct = checkins.length > 0 ? Math.round((count / checkins.length) * 100) : 0;
+            return (
+              <div key={m.label} style={{ marginBottom: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                  <span style={{ color: "hsl(var(--text-muted))" }}>{m.emoji} {m.label}</span>
+                  <span style={{ color: "hsl(var(--text-light))" }}>{count}x</span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: `${pct}%`, background: m.color }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    )}
+
+  </div>
+)}
 
         {tab === 1 && (
           <div className="fade-up">
