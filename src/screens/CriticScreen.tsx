@@ -76,40 +76,33 @@ export function CriticScreen({ onBack, addSession }: CriticScreenProps) {
   };
 
   if (done) {
-    const closingMessage = selected?.closing || "Det du hører er ikke hele bildet av deg.";
-    return (
-      <div className="fade-up">
-        <div className="module-header" style={{ background: "hsl(var(--critic-brown))" }}>
-          <button className="back-btn" onClick={onBack}>←</button>
-          <h1>Når du er hard mot deg selv</h1>
-          <p>Kritikeren er en strategi, ikke sannheten om deg.</p>
-        </div>
-        <div style={{ padding: "16px" }}>
-          <ReflectionBubble
-            context={reflectionContext}
-            systemPrompt="Du er en varm, stille støtteperson. Brukeren har nettopp jobbet med en indre kritikerstemme — noe sårbart og tungt. Les hva de har delt med stor varsomhet. Ikke analyser, ikke oppmuntre med tomme ord, ikke løs noe. Bare anerkjenn det de sitter med, og si noe stille og sant. Skriv på norsk, 2-3 setninger."
-            color="terra"
-            autoFetch={true}
-          />
-          <div style={{
-            marginTop: 14,
-            padding: "18px 20px",
-            background: "hsla(var(--critic-brown) / 0.06)",
-            border: "1px solid hsla(var(--critic-brown) / 0.15)",
-            borderRadius: "var(--radius-sm)",
-            fontFamily: "'Lora', serif",
-            fontStyle: "italic",
-            fontSize: 14,
-            color: "hsl(var(--critic-brown))",
-            lineHeight: 1.7,
-          }}>
-            {closingMessage}
-          </div>
-          <button className="btn-primary" style={{ marginTop: 14 }} onClick={onBack}>Gå tilbake</button>
-        </div>
+  const closingMessage = selected?.closing || "Det du hører er ikke hele bildet av deg.";
+  return (
+    <div className="fade-up">
+      <div className="module-header" style={{ background: "hsl(var(--critic-brown))" }}>
+        <button className="back-btn" onClick={onBack}>←</button>
+        <h1>Når du er hard mot deg selv</h1>
+        <p>Kritikeren er en strategi, ikke sannheten om deg.</p>
       </div>
-    );
-  }
+      <div style={{ padding: "16px" }}>
+        <div className="reframe-box" style={{
+          borderLeftColor: "hsl(var(--critic-brown))",
+          background: "hsla(var(--critic-brown) / 0.04)",
+          marginBottom: 14,
+        }}>
+          {closingMessage}
+        </div>
+        <ReflectionBubble
+          context={reflectionContext}
+          systemPrompt="Du er en varm, stille støtteperson. Brukeren har nettopp jobbet med en indre kritikerstemme — noe sårbart og tungt. Les hva de har delt med stor varsomhet. Ikke analyser, ikke oppmuntre med tomme ord, ikke løs noe. Bare anerkjenn det de sitter med, og si noe stille og sant. Skriv på norsk, 2-3 setninger."
+          color="terra"
+          autoFetch={true}
+        />
+        <button className="btn-primary" style={{ marginTop: 14 }} onClick={onBack}>Gå tilbake</button>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="fade-up">
