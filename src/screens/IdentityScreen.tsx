@@ -235,11 +235,11 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
                 />
 
                 <button
-                  className="btn-secondary"
-                  style={{ marginTop: 14, width: "100%" }}
+                  className="btn-primary"
+                  style={{ marginTop: 14 }}
                   onClick={onBack}
                 >
-                  Tilbake til hjem
+                  Gå tilbake
                 </button>
               </div>
             )}

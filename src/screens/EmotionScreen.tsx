@@ -82,7 +82,7 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
             color="purple"
             autoFetch={true}
           />
-          <button className="btn-primary" style={{ background: "#4A3A6A", marginTop: 14 }} onClick={onBack}>
+          <button className="btn-primary" style={{ marginTop: 14 }} onClick={onBack}>
             Gå tilbake
           </button>
         </div>
@@ -229,7 +229,7 @@ export function EmotionScreen({ onBack }: EmotionScreenProps) {
                     margin: "20px auto",
                     display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                     color: "white", boxShadow: "0 0 50px rgba(106,90,154,0.25)",
-                    animation: "breathe37 8s ease-in-out infinite",
+                    animation: "breatheLoop 8s ease-in-out infinite",
                   }}>
                     <div style={{ fontSize: 28, fontWeight: 700, lineHeight: 1 }}>{formatTime(sitTimer)}</div>
                     <div style={{ fontSize: 11, opacity: 0.8, marginTop: 4 }}>bare vær her</div>

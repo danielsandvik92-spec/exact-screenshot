@@ -83,8 +83,8 @@ export function RelationScreen({ onBack, addSession }: RelationScreenProps) {
             color="green"
             autoFetch={true}
           />
-          <button className="btn-secondary" style={{ marginTop: 14, width: "100%" }} onClick={onBack}>
-            Tilbake til hjem
+          <button className="btn-primary" style={{ marginTop: 14 }} onClick={onBack}>
+            Gå tilbake
           </button>
         </div>
       </div>
