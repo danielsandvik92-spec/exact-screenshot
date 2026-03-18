@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { sGet, sSet } from "@/lib/storage";
 import { ReflectionBubble } from "@/components/ReflectionBubble";
+import { ConfirmLeaveDialog } from "@/components/ConfirmLeaveDialog";
 import { supabase } from "@/lib/supabase";
 
 interface IdentityScreenProps {
@@ -59,7 +60,7 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
   const [done, setDone] = useState(false);
   const [currentAnswer, setCurrentAnswer] = useState("");
   const [portrait, setPortrait] = useState<PortraitEntry[]>([]);
-  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [confirmLeave, setConfirmLeave] = useState(false);
 
   useEffect(() => {
     sGet<string[]>("id-answered-questions").then(d => {
@@ -95,12 +96,19 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
     await loadPortrait();
   };
 
+  const handleBack = () => {
+    if (!done && step > 0) {
+      setConfirmLeave(true);
+    } else {
+      onBack();
+    }
+  };
+
   const handleNext = async () => {
     const newAnswers = [...answers];
     newAnswers[step] = currentAnswer;
     setAnswers(newAnswers);
     setCurrentAnswer("");
-
     if (step < 2) {
       setStep(step + 1);
     } else {
@@ -117,7 +125,6 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
   };
 
   const handleInsightReady = (insight: string) => {
-    setAiInsight(insight);
     saveToPortrait(insight);
   };
 
@@ -125,8 +132,14 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
 
   return (
     <div className="fade-up">
-      <div className="module-header" style={{ background: "#3A5A2A" }}>
-        <button className="back-btn" onClick={onBack}>←</button>
+      {confirmLeave && (
+        <ConfirmLeaveDialog
+          onConfirm={() => { setConfirmLeave(false); onBack(); }}
+          onCancel={() => setConfirmLeave(false)}
+        />
+      )}
+      <div className="module-header" style={{ background: "hsl(var(--identity-green))" }}>
+        <button className="back-btn" onClick={handleBack}>←</button>
         <h1>Hvem er du egentlig?</h1>
         <p>Ikke for å finne et svar — men for å utforske.</p>
       </div>
@@ -172,7 +185,6 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
                     {questions[step]?.kategori === "oyeblikk" ? "Øyeblikk" :
                      questions[step]?.kategori === "verdier" ? "Verdier" : "Fremtid"}
                   </div>
-
                   <div style={{
                     fontFamily: "'Lora', serif", fontSize: 18,
                     color: "hsl(var(--green))", lineHeight: 1.6,
@@ -180,7 +192,6 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
                   }}>
                     {questions[step]?.spørsmål}
                   </div>
-
                   <textarea
                     className="ro-textarea"
                     rows={5}
@@ -189,7 +200,6 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
                     onChange={e => setCurrentAnswer(e.target.value)}
                     style={{ marginBottom: 16 }}
                   />
-
                   <button
                     className="btn-primary"
                     onClick={handleNext}
@@ -198,7 +208,6 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
                   >
                     {step < 2 ? "Neste spørsmål →" : "Avslutt økten"}
                   </button>
-
                   <button
                     className="btn-ghost"
                     onClick={handleNext}
@@ -211,27 +220,10 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
             ) : (
               <div className="fade-up">
                 <div className="ro-card" style={{ margin: "0 0 14px" }}>
-                  <div className="card-title">Økten er fullført</div>
-                  <div className="card-sub" style={{ marginBottom: 16 }}>
-                    Du tok deg tid til å kjenne etter hvem du er. Det er ikke lite.
+                  <div className="card-title">Du tok deg tid til å kjenne etter</div>
+                  <div className="card-sub">
+                    Det du delte i dag legges til portrettet ditt. Over tid vil du se mønstre i hvem du er.
                   </div>
-
-                  {questions.map((q, i) => (
-                    <div key={i} style={{
-                      marginBottom: 16, paddingBottom: 16,
-                      borderBottom: i < 2 ? "1px solid hsl(var(--surface2))" : "none",
-                    }}>
-                      <div style={{
-                        fontFamily: "'Lora', serif", fontStyle: "italic",
-                        fontSize: 13, color: "hsl(var(--text-muted))", marginBottom: 6,
-                      }}>
-                        {q.spørsmål}
-                      </div>
-                      <div style={{ fontSize: 14, color: "hsl(var(--text))", lineHeight: 1.7 }}>
-                        {answers[i] || <span style={{ color: "hsl(var(--text-light))", fontStyle: "italic" }}>Hoppet over</span>}
-                      </div>
-                    </div>
-                  ))}
                 </div>
 
                 <ReflectionBubble
@@ -272,7 +264,7 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
                   </div>
                 </div>
 
-                {portrait.map((entry, i) => (
+                {portrait.map((entry) => (
                   <div key={entry.id} className="ro-card" style={{ margin: "0 0 14px" }}>
                     <div style={{
                       fontSize: 11, fontWeight: 600, letterSpacing: "1px",
@@ -282,7 +274,6 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
                         day: "numeric", month: "long", year: "numeric"
                       })}
                     </div>
-
                     {entry.ai_insight && (
                       <div style={{
                         fontFamily: "'Lora', serif", fontStyle: "italic",
@@ -293,7 +284,6 @@ export function IdentityScreen({ onBack }: IdentityScreenProps) {
                         {entry.ai_insight}
                       </div>
                     )}
-
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {entry.questions?.map((q: string, j: number) => (
                         <div key={j} style={{ fontSize: 12, color: "hsl(var(--text-muted))" }}>
