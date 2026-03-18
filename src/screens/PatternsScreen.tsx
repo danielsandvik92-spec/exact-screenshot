@@ -187,20 +187,40 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
             </div>
 
             <div className="ro-card" style={{ margin: "0 0 14px" }}>
-              <div className="card-title">Uke {getWeekLabel(activeWeek)}</div>
-              {weekCheckins.length === 0 ? (
-                <div className="card-sub">Ingen innsjekker registrert denne uken.</div>
-              ) : (
-                <div style={{ fontFamily: "'Lora', serif", fontStyle: "italic", fontSize: 14, color: "hsl(var(--text))", lineHeight: 1.8, marginTop: 8 }}>
-                  {`Denne uken har du sjekket inn ${weekCheckins.length} gang${weekCheckins.length > 1 ? "er" : ""}.`}
-                  {topMoodMeta && ` Vanligste stemning var ${topMoodMeta.emoji} ${topMoodMeta.label}.`}
-                  {avgEnergy && ` Gjennomsnittlig reguleringsgrad var ${avgEnergy}.`}
-                  {weekAcute.length > 0 && ` Du brukte akutt-modulen ${weekAcute.length} gang${weekAcute.length > 1 ? "er" : ""}.`}
-                  {weekSocial.length > 0 && ` Du jobbet med sosiale situasjoner ${weekSocial.length} gang${weekSocial.length > 1 ? "er" : ""}.`}
-                  {weekCritic.length > 0 && ` Du møtte den indre kritikeren ${weekCritic.length} gang${weekCritic.length > 1 ? "er" : ""}.`}
-                  {weekEvenings.length > 0 && ` Du registrerte ${weekEvenings.length} kveldstanke${weekEvenings.length > 1 ? "r" : ""}.`}
-                </div>
-              )}
+  <div className="card-title">Uke {getWeekLabel(activeWeek)}</div>
+  {weekCheckins.length === 0 ? (
+    <div className="card-sub">Ingen innsjekker registrert denne uken.</div>
+  ) : (
+    <div style={{ fontFamily: "'Lora', serif", fontStyle: "italic", fontSize: 14, color: "hsl(var(--text))", lineHeight: 1.8, marginTop: 8 }}>
+      {weekCheckins.length === 1
+        ? "Du tok deg tid til å sjekke inn denne uken. Det betyr noe."
+        : `Du tok deg tid til å sjekke inn ${weekCheckins.length} ganger denne uken.`}
+      {topMoodMeta && (() => {
+        const label = topMoodMeta.label.toLowerCase();
+        if (label === "god" || label === "rolig") return ` Du har stort sett hatt det ${label} ${topMoodMeta.emoji}`;
+        if (label === "nøytral") return ` Stemningen din har vært i balanse denne uken ${topMoodMeta.emoji}`;
+        if (label === "tung") return ` Det har vært litt tungt denne uken ${topMoodMeta.emoji} — det er lov.`;
+        if (label === "numb") return ` Det virker som du har kjent deg litt nummen denne uken ${topMoodMeta.emoji}`;
+        return ` Vanligste stemning var ${topMoodMeta.emoji} ${topMoodMeta.label}.`;
+      })()}
+      {avgEnergy && (() => {
+        const e = parseFloat(avgEnergy);
+        if (e >= 7) return " Kroppen din har hatt god energi og ro.";
+        if (e >= 4) return " Kroppen din har vært i noenlunde balanse.";
+        return " Det virker som kroppen din har hatt det litt tungt denne uken.";
+      })()}
+      {weekAcute.length > 0 && ` Du brukte akutt-modulen ${weekAcute.length > 1 ? `${weekAcute.length} ganger` : "én gang"} — bra at du tok vare på deg selv.`}
+      {weekSocial.length > 0 && ` Du bearbeidet ${weekSocial.length > 1 ? `${weekSocial.length} sosiale situasjoner` : "en sosial situasjon"} denne uken.`}
+      {weekCritic.length > 0 && ` Du møtte den indre kritikeren ${weekCritic.length > 1 ? `${weekCritic.length} ganger` : "én gang"} — det krever mot.`}
+      {weekEvenings.length > 0 && ` Du tok deg tid til ${weekEvenings.length > 1 ? `${weekEvenings.length} kveldsstunder` : "en kveldsstund"} med deg selv.`}
+    </div>
+  )}
+  {weekCheckins.length > 0 && (
+    <div style={{ marginTop: 14 }}>
+      <CheckinGraph checkins={weekCheckins} />
+    </div>
+  )}
+</div>
               {weekCheckins.length > 0 && (
                 <div style={{ marginTop: 14 }}>
                   <CheckinGraph checkins={weekCheckins} />
