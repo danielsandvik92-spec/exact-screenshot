@@ -127,7 +127,7 @@ const Login = () => {
               }}
             >
               Jeg godtar{" "}
-              <a href="/personvern" style={{ color: "#2D4A3E", textDecoration: "underline" }}>
+              <a href="/personvern" style={{ color: "#2D4A3E", textDecoration: "underline", fontWeight: 700 }}>
                 personvernserklæringen
               </a>{" "}
               og samtykker til at Ro & Retning lagrer dataen jeg registrerer i appen.

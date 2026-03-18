@@ -15,6 +15,13 @@ const BREATH_DURATIONS: Record<string, number> = {
   inn1: 3, inn2: 1, ut: 7, pause: 1,
 };
 
+const BREATH_ANIM: Record<string, string> = {
+  inn1: "breatheIn 3s ease-in-out forwards",
+  inn2: "breatheIn 1s ease-in-out forwards",
+  ut: "breatheOut 7s ease-in-out forwards",
+  pause: "breathePause 1s ease-in-out forwards",
+};
+
 const BREATH_NEXT: Record<string, string> = {
   inn1: "inn2", inn2: "ut", ut: "pause", pause: "inn1",
 };
@@ -177,7 +184,7 @@ export function AcuteScreen({ onBack, addSession, onEmotion }: AcuteScreenProps)
               <div className="card-sub">
                 Dobbelt innpust + lang utpust — den raskeste måten å roe nervesystemet på.
               </div>
-              <div className="breathe-circle">
+              <div key={breathStep} className="breathe-circle" style={{ animation: BREATH_ANIM[breathStep] }}>
                 {breathStep === "inn1" ? `Pust inn (nese)... ${timer}` :
                  breathStep === "inn2" ? `Ekstra sukk inn... ${timer}` :
                  breathStep === "ut" ? `Pust sakte ut... ${timer}` :
