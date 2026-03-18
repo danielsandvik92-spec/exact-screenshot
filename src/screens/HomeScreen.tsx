@@ -18,9 +18,10 @@ export function HomeScreen({ onNav, db, addCheckin, addEveningEval }: HomeScreen
   const [saved, setSaved] = useState(false);
   const [showGraph, setShowGraph] = useState(false);
 
-  const [eq1, setEq1] = useState("");
-  const [eq2, setEq2] = useState("");
-  const [eq3, setEq3] = useState("");
+const [eq1, setEq1] = useState("");
+const [eq2, setEq2] = useState("");
+const [eq3, setEq3] = useState("");
+const [eq4, setEq4] = useState("");
   const [eveningSaved, setEveningSaved] = useState(false);
   const [showEvening, setShowEvening] = useState(false);
 
@@ -62,15 +63,15 @@ export function HomeScreen({ onNav, db, addCheckin, addEveningEval }: HomeScreen
   };
 
   const saveEvening = async () => {
-    const now = new Date();
-    const entry: EveningEvalEntry = {
-      date: `${now.getDate()}/${now.getMonth() + 1}`,
-      q1: eq1, q2: eq2, q3: eq3,
-      ts: now.toISOString()
-    };
-    await addEveningEval(entry);
-    setEveningSaved(true);
+  const now = new Date();
+  const entry: EveningEvalEntry = {
+    date: `${now.getDate()}/${now.getMonth() + 1}`,
+    q1: eq1, q2: eq2, q3: eq3, q4: eq4,
+    ts: now.toISOString()
   };
+  await addEveningEval(entry);
+  setEveningSaved(true);
+};
 
   const modules = [
     { icon: "🌬️", title: "Akutt regulering", sub: "Når alarmen er høy", nav: "acute" as ScreenId, color: "#2D4A3E" },
@@ -247,10 +248,11 @@ export function HomeScreen({ onNav, db, addCheckin, addEveningEval }: HomeScreen
           ) : showEvening ? (
             <div className="fade-up" style={{ marginTop: 14 }}>
               {[
-                { q: "Når følte jeg meg mest ekte i dag?", val: eq1, set: setEq1 },
-                { q: "Når ble jeg mest trigget?", val: eq2, set: setEq2 },
-                { q: "Hva ville jeg sagt til meg selv nå hvis jeg var trygg?", val: eq3, set: setEq3 },
-              ].map((item, i) => (
+  { q: "Når følte jeg meg mest ekte i dag?", val: eq1, set: setEq1 },
+  { q: "Når ble jeg mest trigget?", val: eq2, set: setEq2 },
+  { q: "Hva ville jeg sagt til meg selv nå hvis jeg var trygg?", val: eq3, set: setEq3 },
+  { q: "Hva ga meg energi eller ro i dag — stort eller lite?", val: eq4, set: setEq4 },
+].map((item, i) => (
                 <div key={i} style={{ marginBottom: 14 }}>
                   <div style={{
                     fontFamily: "'Lora', serif", fontStyle: "italic",
