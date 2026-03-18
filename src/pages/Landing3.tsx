@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 
 const choices = [
   { id: "forsta", label: "Jeg vil forstå meg selv bedre" },
@@ -23,6 +24,15 @@ const Landing3 = () => {
   const handleContinue = () => {
     localStorage.setItem("ro-har-sett-intro", "ja");
     navigate("/innlogging");
+  };
+
+  const handleGoogle = async () => {
+    localStorage.setItem("ro-har-sett-intro", "ja");
+    if (!supabase) { navigate("/innlogging"); return; }
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/app" },
+    });
   };
 
   return (
@@ -82,7 +92,7 @@ const Landing3 = () => {
           Dette hjelper appen å møte deg der du er. Du kan endre det når som helst.
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "8px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <button
             onClick={handleContinue}
             style={{
@@ -102,7 +112,7 @@ const Landing3 = () => {
           </button>
 
           <button
-            onClick={handleContinue}
+            onClick={handleGoogle}
             style={{
               width: "100%",
               padding: "16px",
@@ -123,25 +133,25 @@ const Landing3 = () => {
             <GoogleIcon />
             Fortsett med Google
           </button>
-        </div>
 
-        <button
-          onClick={handleContinue}
-          style={{
-            background: "none",
-            border: "none",
-            fontFamily: "'Nunito', sans-serif",
-            fontSize: "13px",
-            color: "#B8C4B0",
-            cursor: "pointer",
-            textAlign: "center",
-            textDecoration: "underline",
-            textUnderlineOffset: 3,
-            padding: 0,
-          }}
-        >
-          Hopp over
-        </button>
+          <button
+            onClick={handleContinue}
+            style={{
+              background: "none",
+              border: "none",
+              fontFamily: "'Nunito', sans-serif",
+              fontSize: "13px",
+              color: "#B8C4B0",
+              cursor: "pointer",
+              textAlign: "center",
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+              padding: 0,
+            }}
+          >
+            Hopp over
+          </button>
+        </div>
 
       </div>
     </div>
