@@ -61,12 +61,22 @@ const Landing1 = () => {
           color: "#2D4A3E",
           lineHeight: 1.6,
           fontWeight: 400,
-          margin: 0,
+          margin: "0 0 28px 0",
         }}>
           Et sted å lande.<br />
           Et sted å kjenne etter.<br />
           Et sted å finne veien<br />tilbake til deg selv.
         </h1>
+        <p style={{
+          fontFamily: "'Nunito', sans-serif",
+          fontSize: "14px",
+          color: "#8E9B8A",
+          lineHeight: 1.7,
+          margin: 0,
+          fontStyle: "italic",
+        }}>
+          Vi laget denne appen fordi vi selv har kjent på det — å ha mye inni seg, men ingen god plass å legge det.
+        </p>
       </div>
 
       <div style={{ width: "100%", marginTop: "auto", paddingTop: "48px" }}>
