@@ -61,8 +61,9 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
   const acuteSessions = db?.acuteSessions || [];
   const socialSessions = db?.socialSessions || [];
   const criticSessions = db?.criticSessions || [];
+  const eveningEvals = db?.eveningEvals || [];
 
-  const allSessions = [...checkins, ...acuteSessions, ...socialSessions, ...criticSessions];
+  const allSessions = [...checkins, ...acuteSessions, ...socialSessions, ...criticSessions, ...eveningEvals];
   const availableWeeks = getAvailableWeeks(allSessions);
   const activeWeek = selectedWeek || (availableWeeks.length > 0 ? availableWeeks[0] : getWeekStart(new Date()));
 
@@ -70,6 +71,7 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
   const weekCritic = filterByWeek(criticSessions, activeWeek);
   const weekSocial = filterByWeek(socialSessions, activeWeek);
   const weekAcute = filterByWeek(acuteSessions, activeWeek);
+  const weekEvenings = filterByWeek(eveningEvals, activeWeek);
 
   const avgEnergy = weekCheckins.length > 0
     ? (weekCheckins.reduce((a, b) => a + b.energy, 0) / weekCheckins.length).toFixed(1)
@@ -90,7 +92,6 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
   const acuteCounts: Record<string, number> = {};
   weekAcute.forEach(s => { if (s.symptom) acuteCounts[s.symptom] = (acuteCounts[s.symptom] || 0) + 1; });
 
-  // All-time mønstre
   const allTimeCriticCounts: Record<string, number> = {};
   criticSessions.forEach(s => { if (s.voice) allTimeCriticCounts[s.voice] = (allTimeCriticCounts[s.voice] || 0) + 1; });
   const topCriticVoice = Object.entries(allTimeCriticCounts).sort((a, b) => b[1] - a[1])[0];
@@ -161,11 +162,9 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
 
       <div style={{ padding: "16px 16px 0" }}>
 
-        {/* ── DENNE UKEN ────────────────────────────────────── */}
         {tab === 0 && (
           <div className="fade-up">
 
-            {/* Uke-velger */}
             <div className="ro-card" style={{ margin: "0 0 14px" }}>
               <div className="card-title" style={{ marginBottom: 8 }}>Velg uke</div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -187,7 +186,6 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
               </div>
             </div>
 
-            {/* Varm oppsummering */}
             <div className="ro-card" style={{ margin: "0 0 14px" }}>
               <div className="card-title">Uke {getWeekLabel(activeWeek)}</div>
               {weekCheckins.length === 0 ? (
@@ -200,6 +198,7 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
                   {weekAcute.length > 0 && ` Du brukte akutt-modulen ${weekAcute.length} gang${weekAcute.length > 1 ? "er" : ""}.`}
                   {weekSocial.length > 0 && ` Du jobbet med sosiale situasjoner ${weekSocial.length} gang${weekSocial.length > 1 ? "er" : ""}.`}
                   {weekCritic.length > 0 && ` Du møtte den indre kritikeren ${weekCritic.length} gang${weekCritic.length > 1 ? "er" : ""}.`}
+                  {weekEvenings.length > 0 && ` Du registrerte ${weekEvenings.length} kveldstanke${weekEvenings.length > 1 ? "r" : ""}.`}
                 </div>
               )}
               {weekCheckins.length > 0 && (
@@ -209,7 +208,6 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
               )}
             </div>
 
-            {/* Det du kommer tilbake til */}
             {(topCriticVoice || topModule?.count > 0) && (
               <div className="ro-card" style={{ margin: "0 0 14px" }}>
                 <div className="card-title">Det du kommer tilbake til</div>
@@ -235,7 +233,6 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
               </div>
             )}
 
-            {/* Denne ukens detaljer */}
             {(Object.keys(criticCounts).length > 0 || Object.keys(socialCounts).length > 0) && (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
                 {Object.keys(criticCounts).length > 0 && (
@@ -280,7 +277,26 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
               </div>
             )}
 
-            {/* Humørfordeling */}
+            {weekEvenings.length > 0 && (
+              <div className="ro-card" style={{ margin: "0 0 14px" }}>
+                <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 10 }}>🌙 Kveldstanker</div>
+                {weekEvenings.map((e, i) => (
+                  <div key={i} style={{
+                    paddingBottom: i < weekEvenings.length - 1 ? 12 : 0,
+                    marginBottom: i < weekEvenings.length - 1 ? 12 : 0,
+                    borderBottom: i < weekEvenings.length - 1 ? "1px solid hsl(var(--surface2))" : "none",
+                  }}>
+                    <div style={{ fontSize: 10, color: "hsl(var(--text-light))", marginBottom: 6, fontWeight: 500 }}>{e.date}</div>
+                    {e.q4 && (
+                      <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", lineHeight: 1.6 }}>
+                        <span style={{ fontWeight: 600, color: "hsl(var(--green))" }}>Energi/ro: </span>{e.q4}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {checkins.length > 0 && (
               <div className="ro-card" style={{ margin: "0 0 14px" }}>
                 <div className="card-title">Humørfordeling totalt</div>
@@ -306,7 +322,6 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
           </div>
         )}
 
-        {/* ── PORTRETT ──────────────────────────────────────── */}
         {tab === 1 && (
           <div className="fade-up">
             {portrait.length === 0 ? (
