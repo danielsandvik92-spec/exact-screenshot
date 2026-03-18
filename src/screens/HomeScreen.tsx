@@ -1,3 +1,4 @@
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MOOD_META } from "@/lib/data";
@@ -330,3 +331,5 @@ const [eq4, setEq4] = useState("");
     </div>
   );
 }
+{/* ── Slett konto ─────────────────────────────────────── */}
+<DeleteAccountSection />

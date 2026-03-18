@@ -33,3 +33,30 @@ export async function checkIsPlus(): Promise<boolean> {
   
   return data?.is_plus ?? false;
 }
+export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {
+  if (!supabase) return { success: false, error: "Ingen tilkobling" };
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return { success: false, error: "Ikke innlogget" };
+
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const data = await response.json();
+    return { success: false, error: data.error || "Noe gikk galt" };
+  }
+
+  // Rydd opp localStorage
+  localStorage.clear();
+
+  return { success: true };
+}
