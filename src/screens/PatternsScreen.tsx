@@ -56,6 +56,7 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
   const [summary, setSummary] = useState<string | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [isPlus, setIsPlus] = useState(false);
+  const [shareStatus, setShareStatus] = useState<"idle" | "copied">("idle");
 
   const checkins = db?.checkins || [];
   const acuteSessions = db?.acuteSessions || [];
@@ -136,6 +137,31 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
     );
     setSummary(result);
     setSummaryLoading(false);
+  };
+
+  const handleShare = async () => {
+    const lines: string[] = [
+      `Ro & Retning — uke ${getWeekLabel(activeWeek)}`,
+      "",
+      `Innsjekker: ${weekCheckins.length}${topMoodMeta ? ` (vanligste stemning: ${topMoodMeta.emoji} ${topMoodMeta.label})` : ""}`,
+    ];
+    if (avgEnergy) lines.push(`Snittenergsnivå: ${avgEnergy}/10`);
+    if (weekAcute.length > 0) lines.push(`Akutt regulering brukt: ${weekAcute.length} gang${weekAcute.length > 1 ? "er" : ""}`);
+    if (weekSocial.length > 0) lines.push(`Sosiale situasjoner: ${weekSocial.length} gang${weekSocial.length > 1 ? "er" : ""}`);
+    if (weekCritic.length > 0) lines.push(`Indre kritiker: ${weekCritic.length} gang${weekCritic.length > 1 ? "er" : ""}`);
+    const q4entries = weekEvenings.filter(e => e.q4);
+    if (q4entries.length > 0) {
+      lines.push("", "Kveldstanker (energi/ro):");
+      q4entries.forEach(e => lines.push(`• ${e.date}: ${e.q4}`));
+    }
+    const text = lines.join("\n");
+    if (navigator.share) {
+      await navigator.share({ title: "Min uke — Ro & Retning", text });
+    } else {
+      await navigator.clipboard.writeText(text);
+      setShareStatus("copied");
+      setTimeout(() => setShareStatus("idle"), 2500);
+    }
   };
 
   const TABS = ["Denne uken", "Portrett"];
@@ -221,6 +247,24 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
         </div>
       )}
     </div>
+
+    {weekCheckins.length > 0 && (
+      <button
+        onClick={handleShare}
+        style={{
+          width: "100%", marginBottom: 14, padding: "13px 16px",
+          background: shareStatus === "copied" ? "hsla(var(--green) / 0.08)" : "hsl(var(--surface))",
+          border: `1.5px solid ${shareStatus === "copied" ? "hsl(var(--green))" : "hsl(var(--surface2))"}`,
+          borderRadius: "var(--radius-sm)",
+          fontFamily: "'Nunito', sans-serif", fontSize: 14,
+          color: shareStatus === "copied" ? "hsl(var(--green))" : "hsl(var(--text-muted))",
+          fontWeight: 500, cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+        }}
+      >
+        {shareStatus === "copied" ? "✓ Kopiert til utklippstavlen!" : "📋 Del med psykolog"}
+      </button>
+    )}
 
     {(topCriticVoice || topModule?.count > 0) && (
       <div className="ro-card" style={{ margin: "0 0 14px" }}>

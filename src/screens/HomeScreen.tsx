@@ -27,6 +27,9 @@ const [eq4, setEq4] = useState("");
   const [showEvening, setShowEvening] = useState(false);
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [reminderTime, setReminderTime] = useState<string | null>(() => localStorage.getItem("rr-reminder-time"));
+  const [reminderSet, setReminderSet] = useState(false);
 
   const checkins = db?.checkins || [];
   const eveningEvals = db?.eveningEvals || [];
@@ -38,12 +41,48 @@ const [eq4, setEq4] = useState("");
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "God morgen" : hour < 18 ? "God ettermiddag" : "God kveld";
 
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - i); return d.toDateString();
+  });
+  const checkinDays = new Set(checkins.map(c => new Date(c.ts).toDateString()));
+  const activeDaysThisWeek = last7Days.filter(d => checkinDays.has(d)).length;
+
+  const scheduleReminder = (time: string) => {
+    const [h, m] = time.split(":").map(Number);
+    const target = new Date(); target.setHours(h, m, 0, 0);
+    const ms = target.getTime() - Date.now();
+    if (ms > 0) {
+      setTimeout(() => {
+        if (Notification.permission === "granted") {
+          new Notification("Ro & Retning 🌿", {
+            body: "Ta tre minutter til deg selv i kveld. Kveldstankene venter.",
+          });
+        }
+      }, ms);
+    }
+  };
+
+  const handleSetReminder = async (time: string) => {
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") return;
+    localStorage.setItem("rr-reminder-time", time);
+    setReminderTime(time);
+    scheduleReminder(time);
+    setReminderSet(true);
+    setShowReminderModal(false);
+  };
+
   useEffect(() => {
     const seen = localStorage.getItem("rr-onboarding-seen");
     if (!seen) {
       const timeout = setTimeout(() => setShowOnboarding(true), 1200);
       return () => clearTimeout(timeout);
     }
+  }, []);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("rr-reminder-time");
+    if (saved) scheduleReminder(saved);
   }, []);
 
   const dismissOnboarding = () => {
@@ -142,12 +181,71 @@ const [eq4, setEq4] = useState("");
   </div>
 )}
 
+      {/* ── Reminder modal ───────────────────────────────────── */}
+      {showReminderModal && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          background: "rgba(0,0,0,0.35)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "0 24px",
+        }}>
+          <div style={{
+            background: "hsl(var(--white))", borderRadius: "var(--radius)",
+            padding: "28px 24px 32px", width: "100%", maxWidth: 360,
+            animation: "fadeUp 0.25s ease forwards",
+          }}>
+            <div style={{ fontFamily: "'Lora', serif", fontSize: 20, color: "hsl(var(--green))", marginBottom: 8 }}>
+              🔔 Kveldspåminnelse
+            </div>
+            <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", marginBottom: 20, lineHeight: 1.6 }}>
+              Velg tidspunkt for daglig påminnelse. Krever at appen er åpen.
+              {reminderTime && ` Nåværende: ${reminderTime}.`}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {["18:00", "19:00", "20:00", "21:00", "22:00"].map(t => (
+                <button
+                  key={t}
+                  onClick={() => handleSetReminder(t)}
+                  style={{
+                    padding: "13px 16px",
+                    background: reminderTime === t ? "hsla(var(--green) / 0.08)" : "hsl(var(--surface))",
+                    border: `1.5px solid ${reminderTime === t ? "hsl(var(--green))" : "hsl(var(--surface2))"}`,
+                    borderRadius: "var(--radius-sm)",
+                    fontFamily: "'Nunito', sans-serif", fontSize: 15,
+                    color: reminderTime === t ? "hsl(var(--green))" : "hsl(var(--text))",
+                    fontWeight: reminderTime === t ? 600 : 400,
+                    cursor: "pointer", textAlign: "left",
+                  }}
+                >
+                  {reminderTime === t ? "✓ " : ""}{t}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowReminderModal(false)}
+              style={{
+                marginTop: 16, background: "none", border: "none",
+                fontFamily: "'Nunito', sans-serif", fontSize: 13,
+                color: "hsl(var(--text-light))", cursor: "pointer", width: "100%",
+              }}
+            >
+              Avbryt
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Header ───────────────────────────────────────────── */}
       <div style={{ padding: "52px 24px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <div style={{ fontFamily: "'Lora', serif", fontSize: 26, color: "hsl(var(--green))", lineHeight: 1.2 }}>Ro & Retning</div>
             <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", marginTop: 2, fontWeight: 400 }}>{greeting}. Hva trenger du akkurat nå?</div>
+            {activeDaysThisWeek > 0 && (
+              <div style={{ fontSize: 12, color: "hsl(var(--text-light))", marginTop: 5 }}>
+                🌿 {activeDaysThisWeek} dag{activeDaysThisWeek > 1 ? "er" : ""} aktiv denne uken
+              </div>
+            )}
           </div>
           <div style={{ width: 40, height: 40, background: "hsl(var(--green))", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🌿</div>
         </div>
@@ -300,8 +398,8 @@ const [eq4, setEq4] = useState("");
 
       {/* ── Info-rad ─────────────────────────────────────────── */}
       <div style={{
-        display: "flex", justifyContent: "center", gap: 24,
-        padding: "20px 24px 32px",
+        display: "flex", justifyContent: "center", gap: 20,
+        padding: "20px 24px 32px", flexWrap: "wrap",
       }}>
         <button
           onClick={() => navigate("/bakgrunn")}
@@ -315,6 +413,18 @@ const [eq4, setEq4] = useState("");
           📖 Om appen
         </button>
         <button
+          onClick={() => setShowReminderModal(true)}
+          style={{
+            background: "none", border: "none",
+            fontFamily: "'Nunito', sans-serif", fontSize: 12,
+            color: reminderSet || reminderTime ? "hsl(var(--green))" : "hsl(var(--text-light))",
+            cursor: "pointer",
+            textDecoration: "underline", textUnderlineOffset: 3,
+          }}
+        >
+          🔔 Kveldspåminnelse{reminderTime ? ` (${reminderTime})` : ""}
+        </button>
+        <button
           onClick={() => navigate("/betaling")}
           style={{
             background: "none", border: "none",
@@ -324,7 +434,7 @@ const [eq4, setEq4] = useState("");
             fontWeight: 600,
           }}
         >
-          ⭐ Ro & Retning Plus
+          ⭐ Plus
         </button>
       </div>
 
