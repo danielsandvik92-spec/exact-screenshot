@@ -32,6 +32,12 @@ const temaer = [
     kort: "Mange av oss har lært å tilpasse oss så godt at vi har mistet kontakten med hvem vi egentlig er. Ikke fordi vi er falske — men fordi tilpasning en gang var nødvendig.",
     mer: "Aksept- og forpliktelsesterapi (ACT) skiller mellom det observerende selvet og tankene og følelsene vi har. Du er ikke angsten din. Du er ikke kritikeren din. Du er den som legger merke til dem.\n\nIdentitet handler ikke om å finne et fast svar på hvem du er — det handler om å bli kjent med hva som faktisk betyr noe for deg, og å leve mer i tråd med det.\n\nSpørsmålet 'hvem er du når du er rolig?' er ikke et spørsmål du svarer på én gang. Det er noe du utforsker over tid — og det er akkurat det identitetsmodulen i appen inviterer deg til.",
   },
+  {
+  id: "tilstedevarelse",
+  tittel: "Å være til stede med det som er",
+  kort: "Ikke alt som er vanskelig trenger å løses. Noen ganger er det viktigste å la følelsen få lov til å være der — uten å analysere den, fikse den eller skyve den bort.",
+  mer: "Forskning på følelsesregulering viser at det å unngå eller undertrykke følelser faktisk forsterker dem over tid. Det som hjelper er det motsatte — å la følelsen være til stede, observere den, og la den passere av seg selv.\n\nNevrovitenskaper Jill Bolte Taylor har vist at en følelsesrespons i kroppen tar rundt 90 sekunder å passere — hvis vi ikke holder den i gang med tanker. Det er kroppen som jobber, ikke et tegn på at noe er galt.\n\nÅ kjenne etter handler ikke om å grave i fortiden eller finne årsaker. Det handler om å stoppe opp et øyeblikk, merke hva som faktisk er der i kroppen, og gi det litt rom. Ofte er det nok.",
+},
 ];
 
 const Bakgrunn = () => {
