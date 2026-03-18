@@ -72,18 +72,18 @@ const Bakgrunn = () => {
         fontWeight: 400,
         marginBottom: "8px",
       }}>
-        Hvorfor appen er som den er
+        Tankene bak
       </h1>
 
       <p style={{
-        fontFamily: "'Nunito', sans-serif",
-        fontSize: "15px",
-        color: "#5E6B5A",
-        lineHeight: 1.8,
-        marginBottom: "32px",
-      }}>
-        Ro & Retning er bygget på metoder fra psykologisk forskning. Her kan du lese litt om tankene bak — for deg som er nysgjerrig på hvorfor ting er lagt opp slik de er.
-      </p>
+  fontFamily: "'Nunito', sans-serif",
+  fontSize: "15px",
+  color: "#5E6B5A",
+  lineHeight: 1.8,
+  marginBottom: "32px",
+}}>
+  Vi laget denne appen fordi vi selv har kjent på det — å ha mye inni seg, men ingen god plass å legge det. Det som er her er ikke et kurs eller en manual. Det er bakgrunnen for valgene vi tok — for deg som er nysgjerrig på hvorfor ting er lagt opp slik de er.
+</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         {temaer.map((tema) => (
