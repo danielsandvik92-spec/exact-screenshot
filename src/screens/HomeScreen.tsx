@@ -292,7 +292,7 @@ const [eq4, setEq4] = useState("");
               </div>
               {mood && (
                 <div className="fade-up" style={{ marginTop: 14 }}>
-                  <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", marginBottom: 6 }}>Reguleringsgrad (0–10)</div>
+                  <div style={{ fontSize: 13, color: "hsl(var(--text-muted))", marginBottom: 6 }}>Hvor rolig er kroppen og sinnet ditt akkurat nå? (0–10)</div>
                   <div className="scale-row">
                     {[...Array(11)].map((_, i) => (
                       <div
