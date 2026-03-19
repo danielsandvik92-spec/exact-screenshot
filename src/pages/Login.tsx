@@ -10,6 +10,7 @@ const Login = () => {
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
 
   const handleSubmit = async () => {
     if (!supabase) return;
@@ -29,6 +30,17 @@ const Login = () => {
     } else {
       navigate("/app");
     }
+    setLoading(false);
+  };
+
+  const handleMagicLink = async () => {
+    if (!supabase || !email) return;
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin + "/app" }
+    });
+    if (!error) setMagicSent(true);
     setLoading(false);
   };
 
@@ -80,6 +92,43 @@ const Login = () => {
             boxSizing: "border-box",
           }}
         />
+
+        {!isRegister && (
+          <button
+            onClick={handleMagicLink}
+            disabled={loading || !email}
+            style={{
+              background: "none",
+              border: "none",
+              fontFamily: "'Nunito', sans-serif",
+              fontSize: "13px",
+              color: "#8E9B8A",
+              cursor: !email ? "default" : "pointer",
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+              padding: "0",
+              textAlign: "left",
+              opacity: !email ? 0.5 : 1,
+            }}
+          >
+            Logg inn uten passord — send meg en lenke
+          </button>
+        )}
+
+        {magicSent && (
+          <p style={{
+            fontFamily: "'Nunito', sans-serif",
+            fontSize: "14px",
+            color: "#2D4A3E",
+            lineHeight: 1.7,
+            margin: 0,
+            padding: "12px 16px",
+            background: "rgba(45,74,62,0.06)",
+            borderRadius: "12px",
+          }}>
+            Sjekk e-posten din — vi har sendt deg en innloggingslenke.
+          </p>
+        )}
 
         <input
           type="password"
@@ -169,7 +218,7 @@ const Login = () => {
 
         {/(Instagram|FBAN|FBAV|Snapchat|Twitter|LinkedIn|WhatsApp)/i.test(navigator.userAgent) && (
           <p style={{ fontSize: 12, color: "#9B6B8A", textAlign: "center", marginBottom: 8 }}>
-            ⚠️ For å logge inn med Google, åpne appen i Safari eller Chrome.
+            ⚠️ Du ser ut til å bruke en innebygd nettleser. For Google-innlogging, åpne i Safari eller Chrome. Du kan også logge inn med e-postlenke nedenfor.
           </p>
         )}
         <button
