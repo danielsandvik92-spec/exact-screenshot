@@ -75,6 +75,12 @@ const Login = () => {
           {isRegister ? "Opprett konto" : "Velkommen tilbake"}
         </h2>
 
+        {isWebView && (
+          <p style={{ fontSize: 14, color: "#5E6B5A", marginBottom: 8, fontFamily: "'Nunito', sans-serif" }}>
+            Skriv inn e-posten din for å komme i gang.
+          </p>
+        )}
+
         <input
           type="email"
           placeholder="E-post"
@@ -217,39 +223,7 @@ const Login = () => {
           {loading ? "Venter..." : isRegister ? "Opprett konto" : "Logg inn"}
         </button>
 
-        {isWebView && (
-          <div style={{
-            background: "rgba(155,107,138,0.08)",
-            border: "1px solid rgba(155,107,138,0.2)",
-            borderRadius: "12px",
-            padding: "14px 16px",
-            marginBottom: "8px",
-          }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#9B6B8A", marginBottom: 4 }}>
-              📱 Åpne i nettleseren din
-            </div>
-            <div style={{ fontSize: 12, color: "#5E6B5A", lineHeight: 1.6, marginBottom: 10 }}>
-              For å logge inn med Google må du åpne appen i Safari eller Chrome — ikke innebygd i Snapchat, Instagram eller lignende.
-            </div>
-            <button
-              onClick={() => window.open(window.location.href, "_blank")}
-              style={{
-                background: "#2D4A3E",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                padding: "8px 14px",
-                fontFamily: "'Nunito', sans-serif",
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Åpne i nettleser →
-            </button>
-          </div>
-        )}
-        <button
+        {!isWebView && <button
           onClick={handleGoogle}
           style={{
             width: "100%",
@@ -275,7 +249,7 @@ const Login = () => {
             <path d="M9 3.583c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 6.294C4.672 4.167 6.656 3.583 9 3.583z" fill="#EA4335"/>
           </svg>
           Fortsett med Google
-        </button>
+        </button>}
 
         <button
           onClick={() => { setIsRegister(!isRegister); setConsent(false); setError(null); }}
