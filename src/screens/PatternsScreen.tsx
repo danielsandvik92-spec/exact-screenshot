@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { MOOD_META } from "@/lib/data";
 import { CheckinGraph } from "@/components/CheckinGraph";
+import { ReflectionBubble } from "@/components/ReflectionBubble";
 import type { AppDB } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
 import { getReflection } from "@/lib/useReflection";
@@ -57,6 +58,9 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [isPlus, setIsPlus] = useState(false);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied">("idle");
+  const [dialogQuestion, setDialogQuestion] = useState("");
+  const [dialogAnswer, setDialogAnswer] = useState<string | null>(null);
+  const [dialogLoading, setDialogLoading] = useState(false);
 
   const checkins = db?.checkins || [];
   const acuteSessions = db?.acuteSessions || [];
@@ -107,6 +111,70 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
   const allTimeMoodCounts = checkins.reduce<Record<string, number>>((acc, c) => {
     acc[c.mood] = (acc[c.mood] || 0) + 1; return acc;
   }, {});
+
+  // ── Adaptive reflection period ───────────────────────────
+  const filterByDate = <T extends { ts?: string }>(items: T[], from: Date): T[] =>
+    items.filter(e => e.ts && new Date(e.ts) >= from);
+
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  const r7Acute = filterByDate(acuteSessions, sevenDaysAgo);
+  const r7Social = filterByDate(socialSessions, sevenDaysAgo);
+  const r7Critic = filterByDate(criticSessions, sevenDaysAgo);
+  const r7Checkins = filterByDate(checkins, sevenDaysAgo);
+  const r7Evenings = filterByDate(eveningEvals, sevenDaysAgo);
+  const useWeekPeriod = (r7Acute.length + r7Social.length + r7Critic.length) >= 3 || r7Checkins.length >= 5;
+
+  const r30Acute = filterByDate(acuteSessions, thirtyDaysAgo);
+  const r30Social = filterByDate(socialSessions, thirtyDaysAgo);
+  const r30Critic = filterByDate(criticSessions, thirtyDaysAgo);
+  const r30Checkins = filterByDate(checkins, thirtyDaysAgo);
+  const r30Evenings = filterByDate(eveningEvals, thirtyDaysAgo);
+  const useMonthPeriod = !useWeekPeriod && ((r30Acute.length + r30Social.length + r30Critic.length) >= 3 || r30Checkins.length >= 5);
+
+  const adaptivePeriod: "uke" | "måned" | null = useWeekPeriod ? "uke" : useMonthPeriod ? "måned" : null;
+  const adAcute = useWeekPeriod ? r7Acute : r30Acute;
+  const adSocial = useWeekPeriod ? r7Social : r30Social;
+  const adCritic = useWeekPeriod ? r7Critic : r30Critic;
+  const adCheckins = useWeekPeriod ? r7Checkins : r30Checkins;
+  const adEvenings = useWeekPeriod ? r7Evenings : r30Evenings;
+
+  const buildAdaptiveContext = (): string => {
+    const parts: string[] = [];
+    if (adAcute.length > 0) {
+      const symptoms = [...new Set(adAcute.map(s => s.symptom).filter(Boolean))];
+      parts.push(`Akutt regulering: ${adAcute.length} gang${adAcute.length > 1 ? "er" : ""}${symptoms.length ? ". Triggere: " + symptoms.join(", ") : ""}`);
+    }
+    if (adSocial.length > 0) {
+      const cats = [...new Set(adSocial.map(s => s.category).filter(Boolean))];
+      parts.push(`Sosiale situasjoner: ${adSocial.length} økt${adSocial.length > 1 ? "er" : ""}${cats.length ? ". Kategorier: " + cats.join(", ") : ""}`);
+    }
+    if (adCritic.length > 0) {
+      const voices = [...new Set(adCritic.map(s => s.voice).filter(Boolean))];
+      parts.push(`Indre kritiker: ${adCritic.length} økt${adCritic.length > 1 ? "er" : ""}${voices.length ? ". Stemmer: " + voices.join(", ") : ""}`);
+    }
+    if (adCheckins.length > 0) {
+      const moodMap: Record<string, number> = {};
+      adCheckins.forEach(c => { moodMap[c.mood] = (moodMap[c.mood] || 0) + 1; });
+      const topM = Object.entries(moodMap).sort((a, b) => b[1] - a[1])[0];
+      parts.push(`${adCheckins.length} innsjekker. Vanligste stemning: ${topM?.[0] || "ukjent"}`);
+    }
+    const q4s = adEvenings.filter(e => e.q4).map(e => e.q4);
+    if (q4s.length > 0) parts.push(`Kveldstanker (energi/ro): ${q4s.join(" / ")}`);
+    return parts.join("\n");
+  };
+
+  // ── Rule-based pattern observations ─────────────────────
+  const totalSessions = acuteSessions.length + socialSessions.length + criticSessions.length;
+  const patternObservations: string[] = [];
+  if (totalSessions >= 3) {
+    if (acuteSessions.length > 2 && socialSessions.length > 2)
+      patternObservations.push("Du bruker ofte akutt-modulen og jobber med sosiale situasjoner — disse henger gjerne sammen.");
+    if (topCriticVoice && topCriticVoice[1] > 2)
+      patternObservations.push(`Stemmen du oftest møter er: "${topCriticVoice[0]}". Den kommer tilbake — det betyr at den bærer på noe viktig.`);
+  }
 
   useEffect(() => {
     checkIsPlus().then(setIsPlus);
@@ -164,6 +232,21 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
     }
   };
 
+  const handleDialogAsk = async () => {
+    if (!dialogQuestion.trim()) return;
+    setDialogLoading(true);
+    setDialogAnswer(null);
+    const portraitContext = portrait.map((e, i) =>
+      `Økt ${i + 1} (${new Date(e.session_date).toLocaleDateString("nb-NO")}):\n${e.questions?.map((q, j) => `Q: ${q}\nA: ${e.answers?.[j] || ""}`).join("\n") || e.ai_insight}`
+    ).join("\n\n");
+    const result = await getReflection(
+      `${portraitContext}\n\nBrukerens spørsmål: "${dialogQuestion}"`,
+      "Du er en varm, nysgjerrig samtalepartner som har lest denne personens identitetsøkter over tid. Svar på spørsmålet deres på en måte som er personlig, varm og ikke-analyserende. Ikke gi råd. Ikke diagnostiser. Bare svar som en klok venn som har fulgt med. Skriv på norsk, 2-4 setninger."
+    );
+    setDialogAnswer(result);
+    setDialogLoading(false);
+  };
+
   const TABS = ["Denne uken", "Portrett"];
 
   return (
@@ -190,6 +273,40 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
 
         {tab === 0 && (
   <div className="fade-up">
+
+    {isPlus && adaptivePeriod && (
+      <div className="ro-card fade-up" style={{ margin: "0 0 14px", borderColor: "hsla(var(--green) / 0.25)" }}>
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: "hsl(var(--green))", marginBottom: 8, opacity: 0.7 }}>
+          {adaptivePeriod === "uke" ? "Ukens refleksjon" : "Månedlig refleksjon"}
+        </div>
+        <div className="card-sub" style={{ marginBottom: 10 }}>
+          Basert på din aktivitet {adaptivePeriod === "uke" ? "de siste 7 dagene" : "den siste måneden"}.
+        </div>
+        <ReflectionBubble
+          context={buildAdaptiveContext()}
+          systemPrompt="Du er en varm, oppmerksom støtteperson som har fulgt denne personen over tid. Les dataen og si noe sant og gjenkjennelig om ett mønster du legger merke til — ikke en rapport, ikke en liste, bare én eller to setninger som speiler noe tilbake. Ikke analyser. Ikke konkluder. Bare si hva du hører. Skriv på norsk."
+          color="green"
+          autoFetch={false}
+        />
+      </div>
+    )}
+
+    {patternObservations.length > 0 && (
+      <div className="ro-card fade-up" style={{ margin: "0 0 14px" }}>
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 12 }}>
+          Det jeg legger merke til
+        </div>
+        {patternObservations.map((obs, i) => (
+          <div key={i} style={{
+            fontFamily: "'Lora', serif", fontStyle: "italic",
+            fontSize: 13, color: "hsl(var(--text-muted))", lineHeight: 1.8,
+            marginBottom: i < patternObservations.length - 1 ? 10 : 0,
+          }}>
+            {obs}
+          </div>
+        ))}
+      </div>
+    )}
 
     <div className="ro-card" style={{ margin: "0 0 14px" }}>
       <div className="card-title" style={{ marginBottom: 8 }}>Velg uke</div>
@@ -444,6 +561,49 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
                     )}
                   </div>
                 ))}
+
+                {isPlus && (
+                  <div className="ro-card" style={{ margin: "0 0 14px" }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: "hsl(var(--text-light))", marginBottom: 8 }}>
+                      Spør om det du har oppdaget
+                    </div>
+                    <textarea
+                      className="ro-textarea"
+                      rows={2}
+                      placeholder="Still ett spørsmål om det du har oppdaget om deg selv..."
+                      value={dialogQuestion}
+                      onChange={e => { setDialogQuestion(e.target.value); setDialogAnswer(null); }}
+                      style={{ marginBottom: 10 }}
+                    />
+                    <button
+                      className="btn-primary"
+                      onClick={handleDialogAsk}
+                      disabled={dialogLoading || dialogQuestion.trim().length < 5}
+                      style={{ opacity: dialogLoading || dialogQuestion.trim().length < 5 ? 0.5 : 1 }}
+                    >
+                      {dialogLoading ? "Tenker..." : "Spør"}
+                    </button>
+                    {dialogAnswer && (
+                      <div style={{
+                        marginTop: 14,
+                        background: "hsla(var(--green) / 0.04)",
+                        borderLeft: "3px solid hsl(var(--green))",
+                        borderRadius: "0 var(--radius-sm) var(--radius-sm) 0",
+                        padding: "16px 18px",
+                      }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--green))", marginBottom: 8, opacity: 0.7 }}>
+                          🌿 Refleksjon
+                        </div>
+                        <div style={{
+                          fontFamily: "'Lora', serif", fontStyle: "italic",
+                          fontSize: 14, color: "hsl(var(--text))", lineHeight: 1.8,
+                        }}>
+                          {dialogAnswer}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
           </div>
