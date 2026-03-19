@@ -167,6 +167,11 @@ const Login = () => {
           {loading ? "Venter..." : isRegister ? "Opprett konto" : "Logg inn"}
         </button>
 
+        {/(Instagram|FBAN|FBAV|Snapchat|Twitter|LinkedIn|WhatsApp)/i.test(navigator.userAgent) && (
+          <p style={{ fontSize: 12, color: "#9B6B8A", textAlign: "center", marginBottom: 8 }}>
+            ⚠️ For å logge inn med Google, åpne appen i Safari eller Chrome.
+          </p>
+        )}
         <button
           onClick={handleGoogle}
           style={{
