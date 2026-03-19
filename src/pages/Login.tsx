@@ -11,6 +11,7 @@ const Login = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
+  const isWebView = /(Instagram|FBAN|FBAV|Snapchat|Twitter|LinkedIn|WhatsApp|MicroMessenger|Line|wechat|android.*version\/[0-9]|iphone.*applewebkit(?!.*safari))/i.test(navigator.userAgent);
 
   const handleSubmit = async () => {
     if (!supabase) return;
@@ -216,10 +217,37 @@ const Login = () => {
           {loading ? "Venter..." : isRegister ? "Opprett konto" : "Logg inn"}
         </button>
 
-        {/(Instagram|FBAN|FBAV|Snapchat|Twitter|LinkedIn|WhatsApp)/i.test(navigator.userAgent) && (
-          <p style={{ fontSize: 12, color: "#9B6B8A", textAlign: "center", marginBottom: 8 }}>
-            ⚠️ Du ser ut til å bruke en innebygd nettleser. For Google-innlogging, åpne i Safari eller Chrome. Du kan også logge inn med e-postlenke nedenfor.
-          </p>
+        {isWebView && (
+          <div style={{
+            background: "rgba(155,107,138,0.08)",
+            border: "1px solid rgba(155,107,138,0.2)",
+            borderRadius: "12px",
+            padding: "14px 16px",
+            marginBottom: "8px",
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#9B6B8A", marginBottom: 4 }}>
+              📱 Åpne i nettleseren din
+            </div>
+            <div style={{ fontSize: 12, color: "#5E6B5A", lineHeight: 1.6, marginBottom: 10 }}>
+              For å logge inn med Google må du åpne appen i Safari eller Chrome — ikke innebygd i Snapchat, Instagram eller lignende.
+            </div>
+            <button
+              onClick={() => window.open(window.location.href, "_blank")}
+              style={{
+                background: "#2D4A3E",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                padding: "8px 14px",
+                fontFamily: "'Nunito', sans-serif",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Åpne i nettleser →
+            </button>
+          </div>
         )}
         <button
           onClick={handleGoogle}
