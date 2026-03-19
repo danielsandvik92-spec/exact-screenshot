@@ -111,19 +111,21 @@ const handleBetaling = async () => {
             lineHeight: 1.8,
             marginTop: "8px",
           }}>
-            Du har tilgang til AI-refleksjon etter alle øvelser.
+            Du blir møtt med noe sant og varmt etter hver økt. Vi er glad du er her.
           </p>
         </div>
       ) : (
         <>
           <p style={{
-            fontFamily: "'Nunito', sans-serif",
-            fontSize: "15px",
-            color: "#5E6B5A",
-            lineHeight: 1.8,
-            marginBottom: "32px",
+            fontFamily: "'Lora', serif",
+            fontSize: "18px",
+            color: "#2D4A3E",
+            lineHeight: 1.6,
+            fontWeight: 400,
+            fontStyle: "italic",
+            marginBottom: "28px",
           }}>
-            Få tilgang til AI-refleksjon etter hver øvelse — en varm, ikke-dømmende stemme som hjelper deg å bearbeide det du nettopp kjente på.
+            For deg som vil gå et steg dypere — og bli sett i det du bærer på.
           </p>
 
           <div style={{
@@ -133,41 +135,64 @@ const handleBetaling = async () => {
             border: "1px solid #DFE5DC",
             marginBottom: "24px",
           }}>
-            <div style={{
-              fontFamily: "'Lora', serif",
-              fontSize: "22px",
-              color: "#2D4A3E",
-              marginBottom: "4px",
-            }}>
-              49 kr / mnd
-            </div>
-            <div style={{
-              fontFamily: "'Nunito', sans-serif",
-              fontSize: "13px",
-              color: "#8E9B8A",
-              marginBottom: "20px",
-            }}>
-              Avslutt når som helst
-            </div>
-
             {[
-              "AI-refleksjon etter hver øvelse",
-              "Sparringspartner i identitetsmodulen",
-              "Støtter videre utvikling av appen",
+              {
+                title: "Bli møtt etter hver økt",
+                body: "En varm, ikke-dømmende stemme reflekterer tilbake det du nettopp delte — ikke for å analysere, men for å la det lande.",
+              },
+              {
+                title: "En samtalepartner som kjenner deg",
+                body: "I identitetsmodulen går du dypere med en sparringspartner som tar svarene dine på alvor og stiller det neste riktige spørsmålet.",
+              },
+              {
+                title: "Ingen begrensninger — bare deg",
+                body: "Bruk modulene så mye du trenger, uten å tenke på tilgang. Gratis-versjonen er fin, men Plus er for de som vil gi seg selv mer rom.",
+              },
             ].map((punkt) => (
-              <div key={punkt} style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                fontFamily: "'Nunito', sans-serif",
-                fontSize: "14px",
-                color: "#5E6B5A",
-                marginBottom: "10px",
-              }}>
-                <span style={{ color: "#2D4A3E", fontWeight: 600 }}>✓</span>
-                {punkt}
+              <div key={punkt.title} style={{ marginBottom: "20px" }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: "8px",
+                  marginBottom: "4px",
+                }}>
+                  <span style={{ color: "#2D4A3E", fontWeight: 600, fontSize: "13px" }}>✓</span>
+                  <span style={{
+                    fontFamily: "'Nunito', sans-serif",
+                    fontSize: "14px",
+                    color: "#2D4A3E",
+                    fontWeight: 600,
+                  }}>{punkt.title}</span>
+                </div>
+                <div style={{
+                  fontFamily: "'Nunito', sans-serif",
+                  fontSize: "13px",
+                  color: "#8E9B8A",
+                  lineHeight: 1.7,
+                  paddingLeft: "21px",
+                }}>
+                  {punkt.body}
+                </div>
               </div>
             ))}
+
+            <div style={{ borderTop: "1px solid #DFE5DC", paddingTop: "20px", marginTop: "4px" }}>
+              <div style={{
+                fontFamily: "'Lora', serif",
+                fontSize: "22px",
+                color: "#2D4A3E",
+                marginBottom: "2px",
+              }}>
+                49 kr / mnd
+              </div>
+              <div style={{
+                fontFamily: "'Nunito', sans-serif",
+                fontSize: "13px",
+                color: "#8E9B8A",
+              }}>
+                Avslutt når som helst — ingen binding
+              </div>
+            </div>
           </div>
 
           <button
@@ -187,7 +212,7 @@ const handleBetaling = async () => {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? "Venter..." : "Bli Plus-medlem"}
+            {loading ? "Venter..." : "Ja, jeg vil gå dypere"}
           </button>
 
           <p style={{
@@ -198,7 +223,7 @@ const handleBetaling = async () => {
             marginTop: "16px",
             lineHeight: 1.7,
           }}>
-            Sikker betaling via Stripe. Du kan avslutte abonnementet når som helst.
+            Sikker betaling via Stripe. Gratis-versjonen forblir alltid tilgjengelig.
           </p>
         </>
       )}
