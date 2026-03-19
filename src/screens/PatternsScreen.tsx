@@ -92,7 +92,12 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
   weekCritic.forEach(s => { if (s.voice) criticCounts[s.voice] = (criticCounts[s.voice] || 0) + 1; });
 
   const socialCounts: Record<string, number> = {};
-  weekSocial.forEach(s => { if (s.category) socialCounts[s.category] = (socialCounts[s.category] || 0) + 1; });
+  weekSocial.forEach(s => {
+    const label = s.category === "fri skriving"
+      ? (s.fear && s.fear.length > 3 ? s.fear.substring(0, 40) + (s.fear.length > 40 ? "..." : "") : "Fri refleksjon")
+      : s.category;
+    if (label) socialCounts[label] = (socialCounts[label] || 0) + 1;
+  });
 
   const acuteCounts: Record<string, number> = {};
   weekAcute.forEach(s => { if (s.symptom) acuteCounts[s.symptom] = (acuteCounts[s.symptom] || 0) + 1; });
@@ -148,7 +153,10 @@ export function PatternsScreen({ onBack, db }: PatternsScreenProps) {
       parts.push(`Akutt regulering: ${adAcute.length} gang${adAcute.length > 1 ? "er" : ""}${symptoms.length ? ". Triggere: " + symptoms.join(", ") : ""}`);
     }
     if (adSocial.length > 0) {
-      const cats = [...new Set(adSocial.map(s => s.category).filter(Boolean))];
+      const cats = [...new Set(adSocial.map(s => s.category === "fri skriving"
+        ? (s.fear && s.fear.length > 3 ? s.fear.substring(0, 40) + (s.fear.length > 40 ? "..." : "") : "Fri refleksjon")
+        : s.category
+      ).filter(Boolean))];
       parts.push(`Sosiale situasjoner: ${adSocial.length} økt${adSocial.length > 1 ? "er" : ""}${cats.length ? ". Kategorier: " + cats.join(", ") : ""}`);
     }
     if (adCritic.length > 0) {
