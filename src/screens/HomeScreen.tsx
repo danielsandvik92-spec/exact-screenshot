@@ -113,13 +113,20 @@ const [eq4, setEq4] = useState("");
   setEveningSaved(true);
 };
 
-  const modules = [
-    { icon: "🌬️", title: "Akutt regulering", sub: "Når alarmen er høy", nav: "acute" as ScreenId, color: "#2D4A3E" },
-    { icon: "👥", title: "Etter sosiale situasjoner", sub: "Når tankene spinner etter å ha vært med folk", nav: "social" as ScreenId, color: "#9B6B8A" },
-    { icon: "🔥", title: "Når du er hard mot deg selv", sub: "Når du er din egen verste kritiker", nav: "critic" as ScreenId, color: "#7A5A3A" },
-    { icon: "💙", title: "Når relasjoner er vanskelige", sub: "Når noen nære gjør vondt eller skaper uro", nav: "relation" as ScreenId, color: "#3A5A7A" },
-    { icon: "🌱", title: "Hvem er du egentlig?", sub: "Hvem er du når du er rolig?", nav: "identity" as ScreenId, color: "#4A6A3A" },
-    { icon: "🫧", title: "Kjenn etter", sub: "Møt det som er der, uten å analysere", nav: "emotion" as ScreenId, color: "#4A3A6A" },
+  const supportModules = [
+    { icon: "🌬️", title: "Akutt regulering", nav: "acute" as ScreenId, color: "#2D4A3E" },
+    { icon: "👥", title: "Etter sosiale situasjoner", nav: "social" as ScreenId, color: "#9B6B8A" },
+    { icon: "🔥", title: "Når du er hard mot deg selv", nav: "critic" as ScreenId, color: "#7A5A3A" },
+    { icon: "💙", title: "Når relasjoner er vanskelige", nav: "relation" as ScreenId, color: "#3A5A7A" },
+    { icon: "🌱", title: "Hvem er du egentlig?", nav: "identity" as ScreenId, color: "#4A6A3A" },
+    { icon: "🫧", title: "Kjenn etter", nav: "emotion" as ScreenId, color: "#4A3A6A" },
+  ];
+
+  const wellnessModules = [
+    { icon: "🌸", title: "Takknemlighet", nav: "gratitude" as ScreenId, color: "#4A6A3A", active: true },
+    { icon: "🤗", title: "Vær snill mot deg selv", nav: null, color: "#9B6B8A", active: false },
+    { icon: "🌞", title: "Forstå det gode", nav: null, color: "#7A6A3A", active: false },
+    { icon: "⭐", title: "Hva du er god på", nav: null, color: "#3A5A7A", active: false },
   ];
 
   return (
@@ -376,25 +383,67 @@ const [eq4, setEq4] = useState("");
         </div>
       </div>
 
-      {/* ── Moduler ───────────────────────────────────────────── */}
-      <div className="section-label">Moduler</div>
-      {modules.map(m => (
-        <div
-          key={m.nav}
-          className="ro-card"
-          style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
-          onClick={() => onNav(m.nav)}
-        >
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: `${m.color}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
-            {m.icon}
+      {/* ── Moduler: støtte ─────────────────────────────────── */}
+      <div className="section-label">Når du trenger støtte</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "0 16px 4px" }}>
+        {supportModules.map(m => (
+          <div
+            key={m.nav}
+            onClick={() => onNav(m.nav)}
+            style={{
+              background: "hsl(var(--white))",
+              border: "1px solid hsl(var(--surface2))",
+              borderRadius: 14,
+              padding: "14px 10px",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+              cursor: "pointer", textAlign: "center",
+            }}
+          >
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: `${m.color}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
+              {m.icon}
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--text))", lineHeight: 1.4 }}>{m.title}</div>
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 500, fontSize: 15 }}>{m.title}</div>
-            <div style={{ fontSize: 12, color: "hsl(var(--text-light))", marginTop: 2 }}>{m.sub}</div>
+        ))}
+      </div>
+
+      {/* ── Moduler: det gode ────────────────────────────────── */}
+      <div className="section-label">Når du vil kjenne etter det gode</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "0 16px 4px" }}>
+        {wellnessModules.map(m => (
+          <div
+            key={m.title}
+            onClick={() => m.active && m.nav && onNav(m.nav)}
+            style={{
+              position: "relative",
+              background: "hsl(var(--white))",
+              border: "1px solid hsl(var(--surface2))",
+              borderRadius: 14,
+              padding: "14px 10px",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+              cursor: m.active ? "pointer" : "default",
+              textAlign: "center",
+              overflow: "hidden",
+            }}
+          >
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: `${m.color}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, opacity: m.active ? 1 : 0.5 }}>
+              {m.icon}
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--text))", lineHeight: 1.4, opacity: m.active ? 1 : 0.5 }}>{m.title}</div>
+            {!m.active && (
+              <div style={{
+                position: "absolute", inset: 0,
+                display: "flex", alignItems: "flex-end", justifyContent: "center",
+                paddingBottom: 8,
+              }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "hsl(var(--text-light))", background: "hsl(var(--surface))", borderRadius: 20, padding: "2px 8px", letterSpacing: "0.5px" }}>
+                  Kommer snart
+                </span>
+              </div>
+            )}
           </div>
-          <div style={{ color: "hsl(var(--text-light))", fontSize: 18 }}>›</div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {/* ── Info-rad ─────────────────────────────────────────── */}
       <div style={{
