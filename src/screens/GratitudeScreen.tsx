@@ -66,7 +66,7 @@ export function GratitudeScreen({ onBack }: GratitudeScreenProps) {
             context={reflectionContext}
             systemPrompt="Du er en varm støtteperson som leser gjennom det denne personen delte om dagen sin. Speiler tilbake noe du legger merke til — ikke analyser, ikke gi råd. Si noe sant og varmt om det de delte. Skriv på norsk, 2-3 setninger."
             color="green"
-            autoFetch={false}
+            autoFetch={true}
           />
           <button className="btn-primary" style={{ marginTop: 14 }} onClick={onBack}>
             Gå tilbake

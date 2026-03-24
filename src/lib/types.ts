@@ -58,4 +58,4 @@ export interface AppDB {
   relationSessions: RelationSessionEntry[];
 }
 
-export type ScreenId = "home" | "acute" | "social" | "critic" | "relation" | "identity" | "emotion" | "patterns" | "gratitude";
+export type ScreenId = "home" | "acute" | "social" | "critic" | "relation" | "identity" | "emotion" | "patterns" | "gratitude" | "compassion";

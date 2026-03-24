@@ -124,7 +124,7 @@ const [eq4, setEq4] = useState("");
 
   const wellnessModules = [
     { icon: "🌸", title: "Takknemlighet", nav: "gratitude" as ScreenId, color: "#4A6A3A", active: true },
-    { icon: "🤗", title: "Vær snill mot deg selv", nav: null, color: "#9B6B8A", active: false },
+    { icon: "🤗", title: "Vær snill mot deg selv", nav: "compassion" as ScreenId, color: "#9B6B8A", active: true },
     { icon: "🌞", title: "Forstå det gode", nav: null, color: "#7A6A3A", active: false },
     { icon: "⭐", title: "Hva du er god på", nav: null, color: "#3A5A7A", active: false },
   ];

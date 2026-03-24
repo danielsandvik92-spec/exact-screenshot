@@ -11,6 +11,7 @@ import { IdentityScreen } from "@/screens/IdentityScreen";
 import { EmotionScreen } from "@/screens/EmotionScreen";
 import { PatternsScreen } from "@/screens/PatternsScreen";
 import { GratitudeScreen } from "@/screens/GratitudeScreen";
+import { CompassionScreen } from "@/screens/CompassionScreen";
 
 const Index = () => {
   const [screen, setScreen] = useState<ScreenId>("home");
@@ -63,6 +64,7 @@ const renderScreen = () => {
       case "emotion": return <EmotionScreen onBack={() => setScreen("home")} />;
       case "patterns": return <PatternsScreen onBack={() => setScreen("home")} db={db} />;
       case "gratitude": return <GratitudeScreen onBack={() => setScreen("home")} />;
+      case "compassion": return <CompassionScreen onBack={() => setScreen("home")} />;
       default: return <HomeScreen onNav={setScreen} db={db} addCheckin={addCheckin} addEveningEval={addEveningEval} />;
     }
   };
